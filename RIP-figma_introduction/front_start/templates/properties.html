@@ -1,0 +1,43 @@
+<html lang="en">
+<head>
+    <title>IBM quantum gate</title>
+    <link rel="stylesheet" href="/static/styles/general.css">
+</head>
+<body class="prop-body">
+    <header>
+        <h1>
+            <a href="/IBM"><img src="http://127.0.0.1:9000/ibm-pictures/img/image.png" alt="home" width="50px" height="50px"></a>
+        </h1>
+    </header>
+    <div class="prop-s-t">Подробнее об однокубитном гейте</div>
+
+    <div class="prop-templ">
+        <div class="prop-card">
+            <div class="prop-crd-cnt">
+                <div class="prop-crd-text">
+                    <p class="prop-crd-ttl">{{ .gate.Title }}</p>
+                    <p class="prop-crd-dscr">{{ .gate.FullInfo }}</p>
+                    {{ if .gate.IsEditable }}
+                        <div class="attributes">
+                            <div class="attribute-editable">
+                                <p>Требуется ввод данных</p>
+                            </div>
+                            <div class="attribute-axis">
+                                <p>Изменение по оси {{ .gate.TheAxis }}</p>
+                            </div>
+                        </div>
+                        {{ else }}
+                        <div class="attribute-not-editable-alter">
+                            <p>Не требуется ввод данных</p>
+                        </div>
+                        {{ end }}
+                </div>
+                <div class="prop-crd-img">
+                    <img src={{ .gate.Image }} alt="home">
+                </div>
+            </div>
+        <a class="card-button-back" href="/IBM">Назад</a>
+        </div>
+    </div>
+</body>
+</html>

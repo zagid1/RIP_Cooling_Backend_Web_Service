@@ -1,0 +1,60 @@
+<html lang="en">
+<head>
+    <title>IBM quantum list</title>
+    <link rel="stylesheet" href="/static/styles/general.css">
+</head>
+<body class="task-body">
+    <header>
+        <h1>
+            <a href="/IBM"><img src="http://127.0.0.1:9000/ibm-pictures/img/image.png" alt="home"></a>
+        </h1>
+    </header>
+    <div class="task-content">
+        <div class="description">
+            <div class="description-header">
+                <p>Описание</p>
+            </div>
+            <div class="description-text">
+                <p>Добавьте описание задачи, чтобы не перепутать её с другими.</p>
+            </div>
+            <div class="description-field">
+                <textarea type="text" name="userName" class="desc-form">{{ .task.Description }}</textarea>
+            </div>
+        </div>
+        
+        <div class="result">
+            <div class="result-header">
+                <p>Результат</p>
+            </div> 
+            <div class="result-field">
+                <input type="text" name="userName" value="{{ .task.Result }}" class="res-form"/>
+            </div> 
+        </div>
+    </div>
+    <div class="task-gates">
+        <div class="task-gates-header">
+            <p>Укажите детали выражения</p>
+        </div>
+        <div class="task-gates-text">
+            <p>Для этого расположите карточки в необходимом порядке и введите углы для операций вращения.</p>
+        </div>
+        {{ range .task.GatesFull }}
+            <div class="task-gates-cards">
+                <img src={{ .CurrentGate.Image }} width="70px" height="50px" alt="theme">
+                <div class="task-card-name">
+                    <p> {{ .CurrentGate.Title }} </p>
+                </div>
+            {{ if .CurrentGate.IsEditable }}
+                <div class="task-card-appendix">
+                    <p> θ =</p>
+                    <input type="text" name="userName" value="{{ .Degrees }}" class="task-card-form"/>
+                </div>
+            {{ end }}
+                <div class="task-card-trash">
+                    <img src="http://127.0.0.1:9000/ibm-pictures/img/trash.png" alt="trash">
+                </div>
+            </div>
+        {{ end }}
+    </div>
+</body>
+</html>

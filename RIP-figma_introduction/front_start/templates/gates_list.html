@@ -1,0 +1,65 @@
+<html lang="en">
+<head>
+    <title>IBM quantum</title>
+    <link rel="stylesheet" href="/static/styles/general.css">
+</head>
+<body class="gates-body">
+    <header>
+        <h1>
+            <a href="/IBM"><img src="http://127.0.0.1:9000/ibm-pictures/img/image.png" alt="home"></a>
+        </h1>
+    </header>
+
+    <div><p class="gates-s-t">Выберите однокубитную операцию</p></div>
+    
+    <div class="gates-t-b">
+        <form action="/IBM" method="GET" class="gates-s-f">
+            <input type="text" name="query" placeholder="Введите название гейта" value="{{ .query }}">
+            <!-- value="{{ .query }}"  нужно для того, чтобы из обработчика передавать
+            введенный запрос обратно на страницу. Тем самым введенный текст в поле поиска будет сохраняться-->
+            <button type="submit">Найти</button>
+        </form>
+
+        <div class="image-with-text">
+            <a href="/task/1">
+                <img src="http://127.0.0.1:9000/ibm-pictures/img/basket.png" alt="home">
+            </a>
+            <p class="overlay-text"> {{ .counter }} </p>
+        </div>
+    </div>
+
+    <div class="gates-templ">
+        {{ range .gates }}
+        <div class="gates-card">
+            <div class="gates-crd-cnt">
+                <div class="gates-crd-txt">
+
+                    {{ if .IsEditable }}
+                    <div class="attributes">
+                        <div class="attribute-editable">
+                            <p>Требуется ввод данных</p>
+                        </div>
+                        <div class="attribute-axis">
+                            <p>Изменение по оси {{ .TheAxis }}</p>
+                        </div>
+                    </div>
+                    {{ else }}
+                    <div class="attribute-not-editable">
+                        Не требуется ввод данных
+                    </div>
+                    {{ end }}
+
+                    <p class="gates-crd-ttl">{{ .Title }}</p>
+                    <p class="gates-crd-dscr">{{ .Description }}</p>
+                </div>
+                <div class="gates-crd-img"><img src={{ .Image }} alt="home"></div>
+            </div>
+            <div class="buttons">
+                <a class="card-button-add" href="/gate_property/{{ .ID }}">Добавить</a>
+                <a class="card-button-more" href="/gate_property/{{ .ID }}">Подробнее</a>
+            </div>
+        </div>
+        {{ end }}
+    </div>
+</body>
+</html>

@@ -1,0 +1,548 @@
+/*===========Common============*/
+/*-----------Header-----------*/
+header {
+    background: rgb(255, 255, 255);
+    height: 70px;
+}
+header img { /*задаем размер картинки*/
+    width: 80px;
+    height: 50px;
+    cursor: pointer;
+    margin: 10px;
+}
+/*===========Gates=list============*/
+.gates-body {
+    background-image: url('http://127.0.0.1:9000/ibm-pictures/img/background_index.png'); /* Путь к изображению */
+    background-repeat: no-repeat; /* Отключает повторение изображения */
+    background-size: cover;       /* Масштабирует изображение, чтобы оно покрыло весь экран */
+    background-attachment: fixed; /* Фиксирует фон, чтобы он не скроллился с страницей */
+    margin: 0;
+    padding: 0;
+}
+/*-----------start-text-----------*/
+.gates-s-t{
+    font-family: IBM Plex Mono;
+    font-size: 24px;
+    margin-left: 30px;
+}
+/*------searching-field--------*/
+.gates-s-f {
+    display: flex;
+    max-width: 1000px;
+    margin: 20px 40px;
+    font-family: IBM Plex Mono;
+}
+
+.gates-s-f input[type="text"] {
+    flex: 1;
+    width: 500px;
+    padding: 12px 16px;
+    border: 2px solid #e1e5eb;
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+    outline: none;
+    font-size: 18px;
+    font-family: IBM Plex Mono;
+    transition: border-color 0.3s ease;
+}
+
+.gates-s-f input[type="text"]:focus {
+    border-color: #000000;
+}
+
+.gates-s-f input[type="text"]::placeholder {
+    color: #a0aec0;
+}
+
+.gates-s-f button {
+    padding: 12px 24px;
+    border: 2px solid #000000;
+    border-radius: 0 10px 10px 0;
+    background-color:rgba(52, 58, 63, 1);
+    color: white;
+    font-weight: 500;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.gates-s-f button:hover {
+    background: #000000;
+    border-color: #000000;
+}
+/*--------task-button--------*/
+.gates-t-b {
+    flex: 0;
+    z-index: 1000; /* чтобы был поверх других элементов */
+    display: flex;
+}
+
+.image-with-text {
+    position: relative;
+    display: inline-block;
+}
+
+.overlay-text {
+    position: absolute;
+    top: 50%;
+    left: 38%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    margin: 0;
+    z-index: 2;
+}
+
+.image-with-text img {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+.gates-t-b img{
+    width: 90px;
+    height: 90px;
+}
+/*---------------template----------------*/
+.gates-templ {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px auto;
+    max-width: 1200px;
+}
+/*-------------Cards--------------*/
+.gates-card {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    width: 530px;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* текст сверху, кнопка снизу */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.gates-crd-cnt{
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex: 1;
+}
+
+.gates-crd-ttl {
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: #000;
+    word-wrap: break-word; /* Перенос длинных слов */
+}
+
+.gates-crd-dscr {
+    font-weight: 100;
+    word-wrap: break-word; /* Перенос длинных слов */
+    overflow-wrap: break-word; /* Альтернативное свойство для переноса */
+    hyphens: auto; /* Автоматическое добавление переносов (поддерживается не всеми браузерами) */
+}
+
+.gates-crd-txt {
+    flex: 1;
+    min-width: 0; /* Важно для правильного переноса текста */
+    width: 300px;
+}
+
+.gates-crd-img {
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: right;
+}
+
+.gates-crd-img img {
+    width: 180px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+/*--------atributes--------*/
+.attribute-not-editable{
+    margin: 0 auto 10px 0;
+    font-size: 9px;
+    text-align: center;
+    color: 171717;
+    background-color: E0E0E0;
+    width: 120px;
+    height: 20px;
+    border-radius: 10px;
+
+    padding-top: 5px;
+}
+
+.attributes{
+    display: flex;  
+    text-align: center;
+    margin: 0 auto 10px 0;
+    width: 200px;
+}
+
+.attribute-editable{
+    flex: 1;
+    font-size: 9px;
+    color: 0D4DD4;
+    background-color: D0E2FF;
+    width: 100px;
+    height: 20px;
+    border-radius: 10px;
+    
+    padding-bottom: 5px;
+}
+.attribute-axis{
+    flex: 1;
+    font-size: 9px;
+    text-align: center;
+    color: 8448D7;
+    background-color: EADEFF;
+    width: 100px;
+    height: 20px;
+    border-radius: 10px;
+    
+    padding-bottom: 5px;
+}
+/*--------buttons----------*/
+.card-button-add {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    color: #fff;
+    font-weight: 500;
+    background-color:rgba(52, 58, 63, 1);
+    padding: 15px 24px;
+    width: 199.83px;
+    height: 18px;
+    border-radius: 0px;
+    text-align: center;
+    display: inline-block;
+    width: fit-content;
+    margin-bottom: 10px;
+    text-decoration: none;
+    /* Плавные переходы */
+    transition: all 0.3s ease;
+    /* Дополнительные стили для лучшего вида */
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-button-more {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    color: #a0a0a0;
+    font-weight: 500;
+    background-color:rgb(255, 255, 255);
+    padding: 12px 24px;
+    width: 199.83px;
+    height: 24px;
+    border-radius: 0px;
+    text-align: center;
+    display: inline-block;
+    width: fit-content;
+    transition: all 0.3s ease;
+    font-style: normal;
+}
+/*-------------Effects--------------*/
+.card-button-add:hover {
+    background-color: #000000; /* темнее красный */
+    transform: translateY(-2px); /* легкий подъем */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* тень больше */
+}
+
+/* Active-эффект при нажатии */
+.card-button-add:active {
+    transform: translateY(0); /* возврат на место */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* тень меньше */
+}
+
+/* Фокус для accessibility */
+.card-button-add:focus {
+    outline: 2px solid #000000;
+    outline-offset: 2px;
+}
+
+.card-button-more:hover {
+    text-decoration: underline;
+    transition: all 0.3s ease;
+    color:rgb(9, 9, 9);
+}
+/*=============Properties============*/
+.prop-body {
+    background-image: url('http://127.0.0.1:9000/ibm-pictures/img/background_properties.png'); /* Путь к изображению */
+    background-repeat: no-repeat; /* Отключает повторение изображения */
+    background-size: cover;       /* Масштабирует изображение, чтобы оно покрыло весь экран */
+    background-attachment: fixed; /* Фиксирует фон, чтобы он не скроллился с страницей */
+    background-position: left bottom;
+    background-color: F4F4F4;
+    margin: 0;
+    padding: 0;
+}
+/*-----------start-text-----------*/
+.prop-s-t{
+    font-family: IBM Plex Mono;
+    font-size: 24px;
+    text-align: center;
+    margin: 20px 0;
+}
+/*---------------template----------------*/
+.prop-templ {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin: 0 auto;
+    max-width: 1000px;
+}
+/*---------------cards----------------*/
+.prop-card {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    width: 800px;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* текст сверху, кнопка снизу */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.prop-crd-cnt{
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex: 1;
+}
+
+.prop-crd-ttl {
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: #000;
+    word-wrap: break-word; /* Перенос длинных слов */
+}
+
+.prop-crd-dscr {
+    font-weight: 100;
+    word-wrap: break-word; /* Перенос длинных слов */
+    overflow-wrap: break-word; /* Альтернативное свойство для переноса */
+    hyphens: auto; /* Автоматическое добавление переносов (поддерживается не всеми браузерами) */
+}
+
+.prop-crd-txt {
+    flex: 1;
+    min-width: 0; /* Важно для правильного переноса текста */
+    width: 300px;
+}
+
+.prop-crd-img {
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: right;
+}
+
+.prop-crd-img img {
+    width: 280px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+/*--------atributes--------*/
+.attribute-not-editable-alter{
+    margin: 0 auto 10px 0;
+    font-size: 9px;
+    text-align: center;
+    color: 171717;
+    background-color: E0E0E0;
+    width: 120px;
+    height: 20px;
+    border-radius: 10px;
+}
+/*--------buttons----------*/
+.card-button-back {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    color: #fff;
+    font-weight: 500;
+    background-color:rgba(52, 58, 63, 1);
+    padding: 12px 24px;
+    border-radius: 0;
+    text-align: center;
+    display: inline-block;
+    width: fit-content;
+    margin-top: auto;
+    text-decoration: none;
+    
+    /* Плавные переходы */
+    transition: all 0.3s ease;
+    
+    /* Дополнительные стили для лучшего вида */
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+/*-------------Effects--------------*/
+.card-button-back:hover {
+    background-color: #000000; /* темнее красный */
+    transform: translateY(-2px); /* легкий подъем */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* тень больше */
+}
+
+/* Active-эффект при нажатии */
+.card-button-back:active {
+    transform: translateY(0); /* возврат на место */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* тень меньше */
+}
+/*===========Task==================*/
+.task-body {
+    background-image: url('http://127.0.0.1:9000/ibm-pictures/img/background_order.png');
+    background-repeat: no-repeat; /* Отключает повторение изображения */
+    background-size: cover;       /* Масштабирует изображение, чтобы оно покрыло весь экран */
+    background-attachment: fixed; /* Фиксирует фон, чтобы он не скроллился с страницей */
+    background-position: right bottom;
+    background-color: F4F4F4;
+    margin: 0;
+    padding: 0;
+}
+/*-----------main-----------*/
+.task-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+    gap: 20px;
+    margin: 20px 0 5px 0;
+    max-width: 1300px;
+}
+/*----------details---------*/
+.task-gates{
+    justify-content: left;   
+    width: 1000px; 
+}
+
+.task-gates-header{
+    font-family: IBM Plex Mono;
+    font-size: 24px;
+    margin-left: 30px;
+    height: 26px;   
+}
+
+.task-gates-text{
+    font-family: IBM Plex Mono;
+    font-size: 16px;
+    margin-left: 60px;
+    color: rgb(106, 106, 106);
+    width: 700px;  
+    word-wrap: break-word; /* Перенос длинных слов */
+    overflow-wrap: break-word; /* Альтернативное свойство для переноса */
+    hyphens: auto; 
+}
+/*-------result--------*/
+.result-header {
+    font-family: IBM Plex Mono;
+    font-size: 24px;
+    margin-left: 30px;
+    height: 26px;
+}
+
+.res-form{
+    width: 200px;
+    height: 40px;
+    color: black;
+    background-color: white;
+    border-color: black;
+    border-radius: 5px;
+    margin: 10px 0 auto 30px;
+}
+/*-------description--------*/
+.description-header{
+    font-family: IBM Plex Mono;
+    font-size: 24px;
+    margin-left: 30px;
+    height: 26px;
+}
+.description-text {
+    font-family: IBM Plex Mono;
+    font-size: 16px;
+    margin-left: 60px;
+    color: rgb(106, 106, 106);
+}
+
+.desc-form {
+    width: 800px;
+    height: 100px;
+    color: black;
+    background-color: white;
+    border-color: black;
+    border-radius: 5px;
+    margin-left: 50px;
+}
+
+/*-------card-content--------*/
+.task-gates-cards {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    width: 800px;
+    height: 50px;
+    margin: 10px auto 10px 50px;
+    position: relative;
+    padding-right: 10px;
+}
+
+.task-gates-cards img:first-child {
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.task-card-name {
+    margin-left: 20px;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.task-card-appendix {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.task-card-appendix p {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.task-card-form {
+    width: 50px;
+    height: 26px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 0 5px;
+}
+
+.task-card-trash {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.task-card-trash img {
+    width: 30px;
+    height: 30px;
+}

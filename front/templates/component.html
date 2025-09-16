@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Component.Title }} - coolSystemsCalculator.org</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins&display=swap" rel="stylesheet">
+    <link href="/static/styles/componentStyle.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+    <header class="header">
+        <h1 class="site-title">coolSystemsCalculator.org</h1>
+        <a href="/coolSystemsSalculator" class="home-link">HOME</a>
+    </header>
+
+    <!-- Component Detail -->
+    <div class="component-detail">
+        <div class="component-image-container">
+    <img src="{{ .Component.Image }}" alt="{{ .Title }}">
+</div>
+        <div class="component-info-large">
+            <h1>{{ .Component.Title }}</h1>
+            <p class="tdp">TDP: {{ .Component.TDP }} Вт</p>
+            <p class="vendor">Производитель: {{ .Component.Vendor }}</p>
+            <p class="description">{{ .Component.Description }}</p>
+            
+            <h3>Характеристики:</h3>
+            <ul class="specs">
+                {{ range .Component.Specs }}
+                <li>{{ . }}</li>
+                {{ end }}
+            </ul>
+            
+            <br>
+            <!-- <a href="/coolSystemsSalculator" class="back-button">← Назад к списку</a> -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-title">coolSystemsCalculator.org</p>
+        <p class="copyright">©2007–2025 – TDP CALC. RIP Ltd, RF</p>
+        <p class="phone">+7 (496) 234–43–43</p>
+    </footer>
+
+    <script>
+        function addToCart(componentId) {
+            console.log('Добавление в корзину компонента:', componentId);
+            alert('Компонент добавлен в заявку!');
+        }
+    </script>
+</body>
+</html>

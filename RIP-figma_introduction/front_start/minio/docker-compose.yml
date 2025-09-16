@@ -1,0 +1,27 @@
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"   
+      - "9001:9001"   
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    command: server /data --console-address ":9001"
+    volumes:
+      - ./minio-data:/data
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on: [minio]
+    volumes:
+      - ./resources/img:/seed-img:ro
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 minioadmin minioadmin123 &&
+      mc mb -p local/images || true &&
+      mc anonymous set download local/images &&    # разрешить анонимное чтение (GET)
+      mc cp --recursive /seed-img local/images/ || true &&
+      echo 'MinIO ready' && sleep 1
+      "
