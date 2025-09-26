@@ -67,8 +67,9 @@ func (h *Handler) GetComponent(ctx *gin.Context) {
 	})
 }
 
+
 // GetRequest - отображение статической заявки (аналог GetTask)
-func (h *Handler) GetTask(ctx *gin.Context) {
+func (h *Handler) GetCoolTask(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 
 	id, err := strconv.Atoi(idStr)
@@ -91,16 +92,16 @@ func (h *Handler) GetTask(ctx *gin.Context) {
 }
 
 // RequestHandler - отображение страницы заявки
-func (h *Handler) RequestHandler(ctx *gin.Context) {
+// func (h *Handler) RequestHandler(ctx *gin.Context) {
 
-	request, err := h.Repository.GetRequest(1)
-	if err != nil {
-		logrus.Error("Request not found:", err)
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "Request not found"})
-		return
-	}
+// 	request, err := h.Repository.GetRequest(1)
+// 	if err != nil {
+// 		logrus.Error("Request not found:", err)
+// 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Request not found"})
+// 		return
+// 	}
 
-	ctx.HTML(http.StatusOK, "request.html", gin.H{
-		"request": request,
-	})
-}
+// 	ctx.HTML(http.StatusOK, "request.html", gin.H{
+// 		"request": request,
+// 	})
+// }

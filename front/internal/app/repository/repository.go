@@ -43,18 +43,8 @@ var requestList = map[int]Request{
 	1: {
 		ID_request: 1,
 		Components: []Component{
-			{
-				ID:    1,
-				Title: "Intel Xeon 8490",
-				TDP:   350,
-				Image: "http://127.0.0.1:9000/images/intel_zeon.webp",
-			},
-			{
-				ID:    4,
-				Title: "NVIDIA H100 80GB",
-				TDP:   350,
-				Image: "http://127.0.0.1:9000/images/nvidia_h100.webp",
-			},
+			{ID: 1},
+			{ID: 4},
 		},
 		Count:        2,
 		SquareArea:   25.0,
@@ -194,6 +184,18 @@ func (r *Repository) GetRequest(id int) (Request, error) {
 	if !exists {
 		return Request{}, fmt.Errorf("заявка не найдена")
 	}
+
+	// Заменяем компоненты в заявке на полные данные из базы
+	var fullComponents []Component
+	for _, comp := range request.Components {
+		fullComp, err := r.GetComponent(comp.ID)
+		if err != nil {
+			return Request{}, fmt.Errorf("ошибка получения компонента %d: %w", comp.ID, err)
+		}
+		fullComponents = append(fullComponents, fullComp)
+	}
+
+	request.Components = fullComponents
 	return request, nil
 }
 
