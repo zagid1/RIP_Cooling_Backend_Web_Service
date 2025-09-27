@@ -25,7 +25,7 @@ func (h *Handler) GetComponents(ctx *gin.Context) {
 
 	searchQuery := ctx.Query("query")
 	if searchQuery == "" {
-		components, err = h.Repository.GetComponents()
+		components, err = h.Repository.GetComponents() 
 		if err != nil {
 			logrus.Error(err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
