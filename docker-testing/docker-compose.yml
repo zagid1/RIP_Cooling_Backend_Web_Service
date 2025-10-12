@@ -7,7 +7,7 @@ services:
         source: postgresdb-data
         target: /var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"  # меняем внешний порт на 5433
     environment:
       POSTGRES_USER: root
       POSTGRES_DB: RIP

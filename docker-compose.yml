@@ -7,7 +7,7 @@ services:
         source: postgresdb-data
         target: /var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_USER: root
       POSTGRES_DB: RIP
@@ -34,6 +34,13 @@ services:
     command: redis-server --save 20 1 --loglevel warning --requirepass password
     volumes:
       - redis-data:/data
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
 
 volumes:
   postgresdb-data:
