@@ -1,3 +1,6 @@
 front/minio/mc.exe
+front/minio/minio-data/.minio.sys/backets/
 .env
+.meta
+
 
