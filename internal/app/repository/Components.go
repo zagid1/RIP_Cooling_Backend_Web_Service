@@ -160,7 +160,7 @@ func (r *Repository) AddComponentToDraft(userID, componentID uint) error {
 		}
 
 		if err := tx.Create(&link).Error; err != nil {
-			return fmt.Errorf("failed to add component to request: %w", err)
+			return fmt.Errorf("failed to add component to coolrequest: %w", err)
 		}
 
 		if err := tx.Model(&ds.Component{}).Where("id = ?", componentID).Update("status", true).Error; err != nil {

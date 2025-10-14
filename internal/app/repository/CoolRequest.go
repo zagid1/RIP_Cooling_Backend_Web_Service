@@ -13,12 +13,12 @@ import (
 
 // GET /api/requests/cart - иконка корзины
 func (r *Repository) GetDraftRequest(userID uint) (*ds.CoolRequest, error) {
-	var request ds.CoolRequest
-	err := r.db.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&request).Error
+	var coolrequest ds.CoolRequest
+	err := r.db.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&coolrequest).Error
 	if err != nil {
 		return nil, err
 	}
-	return &request, nil
+	return &coolrequest, nil
 }
 
 // GET /api/requests/:id - одна заявка с компонентами
@@ -66,22 +66,22 @@ func (r *Repository) RequestsListFiltered(status, from, to string) ([]ds.CoolReq
 	}
 
 	var result []ds.CoolRequestDTO
-	for _, request := range requestLIst {
+	for _, coolrequest := range requestLIst {
 		dto := ds.CoolRequestDTO{
-			ID:             request.ID,
-			Status:         request.Status,
-			CreationDate:   request.CreationDate,
-			CreatorID:      request.Creator.ID,
+			ID:             coolrequest.ID,
+			Status:         coolrequest.Status,
+			CreationDate:   coolrequest.CreationDate,
+			CreatorID:      coolrequest.Creator.ID,
 			ModeratorID:    nil,
-			FormingDate:    request.FormingDate,
-			CompletionDate: request.CompletionDate,
-			RoomArea:       request.RoomArea,
-			RoomHeight:     request.RoomHeight,
-			CoolingPower:   request.CoolingPower,
+			FormingDate:    coolrequest.FormingDate,
+			CompletionDate: coolrequest.CompletionDate,
+			RoomArea:       coolrequest.RoomArea,
+			RoomHeight:     coolrequest.RoomHeight,
+			CoolingPower:   coolrequest.CoolingPower,
 		}
 
-		if request.ModeratorID != nil {
-			dto.ModeratorID = &request.Moderator.ID
+		if coolrequest.ModeratorID != nil {
+			dto.ModeratorID = &coolrequest.Moderator.ID
 		}
 		result = append(result, dto)
 	}
@@ -108,36 +108,36 @@ func (r *Repository) UpdateRequestUserFields(id uint, req ds.CoolRequestUpdateRe
 
 // PUT /api/requests/:id/form - сформировать заявку
 func (r *Repository) FormRequest(id uint, creatorID uint) error {
-	var request ds.CoolRequest
-	// if err := r.db.Preload("ComponentLink.Component").First(&request, id).Error; err != nil {
+	var coolrequest ds.CoolRequest
+	// if err := r.db.Preload("ComponentLink.Component").First(&coolrequest, id).Error; err != nil {
 	// 	return err
 	// }
-	if err := r.db.First(&request, id).Error; err != nil {
+	if err := r.db.First(&coolrequest, id).Error; err != nil {
 		return err
 	}
 
-	if request.CreatorID != creatorID {
-		return errors.New("only creator can form request")
+	if coolrequest.CreatorID != creatorID {
+		return errors.New("only creator can form coolrequest")
 	}
 
-	if request.Status != ds.StatusDraft {
-		return errors.New("only draft request can be formed")
+	if coolrequest.Status != ds.StatusDraft {
+		return errors.New("only draft coolrequest can be formed")
 	}
 
-	if request.RoomArea == nil || request.RoomHeight == nil {
+	if coolrequest.RoomArea == nil || coolrequest.RoomHeight == nil {
 		return errors.New("room area and height are required")
 	}
 
 	// Расчет мощности охлаждения на основе компонентов
 	// totalTDP := 0
-	// for _, link := range request.ComponentLink {
+	// for _, link := range coolrequest.ComponentLink {
 	// 	totalTDP += link.Component.TDP * int(link.Count)
 	// }
 
-	//coolingPower := float64(totalTDP)*1.2 + (*request.RoomArea * *request.RoomHeight * 0.1)
+	//coolingPower := float64(totalTDP)*1.2 + (*coolrequest.RoomArea * *coolrequest.RoomHeight * 0.1)
 
 	now := time.Now()
-	return r.db.Model(&request).Updates(map[string]interface{}{
+	return r.db.Model(&coolrequest).Updates(map[string]interface{}{
 		"status":       ds.StatusFormed,
 		"forming_date": now,
 		//	"cooling_power": coolingPower,
@@ -148,12 +148,12 @@ func (r *Repository) FormRequest(id uint, creatorID uint) error {
 func (r *Repository) ResolveRequest(id uint, moderatorID uint, action string) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 
-		var request ds.CoolRequest
-		if err := tx.Preload("ComponentLink.Component").First(&request, id).Error; err != nil {
+		var coolrequest ds.CoolRequest
+		if err := tx.Preload("ComponentLink.Component").First(&coolrequest, id).Error; err != nil {
 			return err
 		}
 
-		if request.Status != ds.StatusFormed {
+		if coolrequest.Status != ds.StatusFormed {
 			return errors.New("only formed coolrequest can be resolved")
 		}
 
@@ -167,7 +167,7 @@ func (r *Repository) ResolveRequest(id uint, moderatorID uint, action string) er
 		case "complete":
 			{
 				updates["status"] = ds.StatusCompleted
-				coolingPower := r.calculateCoolingPower(request)
+				coolingPower := r.calculateCoolingPower(coolrequest)
 				updates["cooling_power"] = coolingPower
 			}
 		case "reject":
@@ -181,7 +181,7 @@ func (r *Repository) ResolveRequest(id uint, moderatorID uint, action string) er
 		}
 
 		var CoolRequestIDs []uint
-		for _, link := range request.ComponentLink {
+		for _, link := range coolrequest.ComponentLink {
 			CoolRequestIDs = append(CoolRequestIDs, link.ComponentID)
 		}
 
@@ -195,16 +195,16 @@ func (r *Repository) ResolveRequest(id uint, moderatorID uint, action string) er
 }
 
 // Функция расчета мощности охлаждения по формуле: Q = P × (1.3 + 15/V) [кВт]
-func (r *Repository) calculateCoolingPower(request ds.CoolRequest) float64 {
+func (r *Repository) calculateCoolingPower(coolrequest ds.CoolRequest) float64 {
 	// P = Σ(TDP компонентов) / 1000 - тепловыделение оборудования [кВт]
 	totalTDP := 0
-	for _, link := range request.ComponentLink {
+	for _, link := range coolrequest.ComponentLink {
 		totalTDP += link.Component.TDP * int(link.Count)
 	}
 	P := float64(totalTDP) / 1000.0 // переводим в кВт
 
 	// V = S × h - объем помещения [м³]
-	V := *request.RoomArea * *request.RoomHeight
+	V := *coolrequest.RoomArea * *coolrequest.RoomHeight
 
 	// Q = P × (1.3 + 15/V) [кВт]
 	Q := P * (1.3 + 15.0/V)
@@ -215,9 +215,9 @@ func (r *Repository) calculateCoolingPower(request ds.CoolRequest) float64 {
 // DELETE /api/requests/:id - удаление заявки
 func (r *Repository) LogicallyDeleteRequest(requestID uint) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		var request ds.CoolRequest
+		var coolrequest ds.CoolRequest
 
-		if err := tx.Preload("ComponentLink").First(&request, requestID).Error; err != nil {
+		if err := tx.Preload("ComponentLink").First(&coolrequest, requestID).Error; err != nil {
 			return err
 		}
 
@@ -232,7 +232,7 @@ func (r *Repository) LogicallyDeleteRequest(requestID uint) error {
 
 		// Обновляем статус связанных компонентов (делаем неактивными)
 		var componentIDs []uint
-		for _, link := range request.ComponentLink {
+		for _, link := range coolrequest.ComponentLink {
 			componentIDs = append(componentIDs, link.ComponentID)
 		}
 
@@ -254,7 +254,7 @@ func (r *Repository) RemoveComponentFromRequest(requestID, componentID uint) err
 		}
 
 		if result.RowsAffected == 0 {
-			return errors.New("component not found in this request")
+			return errors.New("component not found in this coolrequest")
 		}
 
 		// Обновляем статус компонента
@@ -305,8 +305,8 @@ func (r *Repository) UpdateMM(requestID, componentID uint, updateData ds.Compone
 // POST /api/requests/draft/components/:component_id - добавление компонента в черновик
 // func (r *Repository) AddComponentToDraft(userID, componentID uint) error {
 // 	return r.db.Transaction(func(tx *gorm.DB) error {
-// 		var request ds.CoolRequest
-// 		err := tx.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&request).Error
+// 		var coolrequest ds.CoolRequest
+// 		err := tx.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&coolrequest).Error
 // 		if err != nil {
 // 			if errors.Is(err, gorm.ErrRecordNotFound) {
 // 				newRequest := ds.CoolRequest{
@@ -315,25 +315,25 @@ func (r *Repository) UpdateMM(requestID, componentID uint, updateData ds.Compone
 // 					CreationDate: time.Now(),
 // 				}
 // 				if err := tx.Create(&newRequest).Error; err != nil {
-// 					return fmt.Errorf("failed to create draft request: %w", err)
+// 					return fmt.Errorf("failed to create draft coolrequest: %w", err)
 // 				}
-// 				request = newRequest
+// 				coolrequest = newRequest
 // 			} else {
 // 				return err
 // 			}
 // 		}
 
 // 		var count int64
-// 		tx.Model(&ds.ComponentToRequest{}).Where("coolrequest_id = ? AND component_id = ?", request.ID, componentID).Count(&count)
+// 		tx.Model(&ds.ComponentToRequest{}).Where("coolrequest_id = ? AND component_id = ?", coolrequest.ID, componentID).Count(&count)
 // 		if count > 0 {
 // 			// Если компонент уже есть, увеличиваем количество
 // 			return tx.Model(&ds.ComponentToRequest{}).
-// 				Where("coolrequest_id = ? AND component_id = ?", request.ID, componentID).
+// 				Where("coolrequest_id = ? AND component_id = ?", coolrequest.ID, componentID).
 // 				Update("count", gorm.Expr("count + 1")).Error
 // 		}
 
 // 		link := ds.ComponentToRequest{
-// 			CoolRequestID: request.ID,
+// 			CoolRequestID: coolrequest.ID,
 // 			ComponentID:   componentID,
 // 			Count:         1,
 // 		}
@@ -350,17 +350,17 @@ func (r *Repository) UpdateMM(requestID, componentID uint, updateData ds.Compone
 // )
 
 // func (r *Repository) GetDraftCoolRequest(userID uint) (*ds.CoolRequest, error) {
-// 	var request ds.CoolRequest
+// 	var coolrequest ds.CoolRequest
 
-// 	err := r.db.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&request).Error
+// 	err := r.db.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&coolrequest).Error
 // 	if err != nil {
 // 		return nil, err
 // 	}
-// 	return &request, nil
+// 	return &coolrequest, nil
 // }
 
-// func (r *Repository) CreateCoolRequest(request *ds.CoolRequest) error {
-// 	return r.db.Create(request).Error
+// func (r *Repository) CreateCoolRequest(coolrequest *ds.CoolRequest) error {
+// 	return r.db.Create(coolrequest).Error
 // }
 
 // func (r *Repository) AddComponentToCoolRequest(coolRequestID, componentID uint) error {
@@ -368,7 +368,7 @@ func (r *Repository) UpdateMM(requestID, componentID uint, updateData ds.Compone
 
 // 	r.db.Model(&ds.ComponentToRequest{}).Where("coolrequest_id = ? AND component_id = ?", coolRequestID, componentID).Count(&count)
 // 	if count > 0 {
-// 		return errors.New("components already in request")
+// 		return errors.New("components already in coolrequest")
 // 	}
 
 // 	link := ds.ComponentToRequest{

@@ -9,6 +9,16 @@ import (
 )
 
 // GET /api/components - список компонентов с фильтрацией
+
+// GetComponents godoc
+// @Summary      Получить список компонентов (все)
+// @Description  Возвращает постраничный список компонентов системы охлаждения.
+// @Tags         components
+// @Produce      json
+// @Param        title query string false "Фильтр по названию компонента"
+// @Success      200 {object} ds.PaginatedResponse
+// @Failure      500 {object} map[string]string "Внутренняя ошибка сервера"
+// @Router       /components [get]
 func (h *Handler) GetComponents(c *gin.Context) {
 	title := c.Query("title")
 
@@ -38,6 +48,16 @@ func (h *Handler) GetComponents(c *gin.Context) {
 }
 
 // GET /api/components/:id - один компонент
+
+// GetComponent godoc
+// @Summary      Получить один компонент по ID (все)
+// @Description  Возвращает детальную информацию о компоненте системы охлаждения.
+// @Tags         components
+// @Produce      json
+// @Param        id path int true "ID компонента"
+// @Success      200 {object} ds.ComponentDTO
+// @Failure      404 {object} map[string]string "Компонент не найден"
+// @Router       /components/{id} [get]
 func (h *Handler) GetComponent(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -65,6 +85,20 @@ func (h *Handler) GetComponent(c *gin.Context) {
 }
 
 // POST /api/components - создание компонента
+
+// CreateComponent godoc
+// @Summary      Создать новый компонент (только модератор)
+// @Description  Создает новую запись о компоненте системы охлаждения.
+// @Tags         components
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        componentData body ds.ComponentCreateRequest true "Данные нового компонента"
+// @Success      201 {object} ds.ComponentDTO
+// @Failure      400 {object} map[string]string "Ошибка валидации"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      403 {object} map[string]string "Доступ запрещен (не модератор)"
+// @Router       /components [post]
 func (h *Handler) CreateComponent(c *gin.Context) {
 	var req ds.ComponentCreateRequest
 	if err := c.BindJSON(&req); err != nil {
@@ -72,15 +106,12 @@ func (h *Handler) CreateComponent(c *gin.Context) {
 		return
 	}
 
-	statusValue := false
-
 	component := ds.Component{
 		Title:          req.Title,
 		Description:    req.Description,
 		Specifications: req.Specifications,
 		TDP:            req.TDP,
-		Status:         statusValue,
-		//Status:         true, // по умолчанию активен
+		Status:         true, // по умолчанию активен
 	}
 
 	if err := h.Repository.CreateComponent(&component); err != nil {
@@ -102,6 +133,21 @@ func (h *Handler) CreateComponent(c *gin.Context) {
 }
 
 // PUT /api/components/:id - обновление компонента
+
+// UpdateComponent godoc
+// @Summary      Обновить компонент (только модератор)
+// @Description  Обновляет информацию о существующем компоненте системы охлаждения.
+// @Tags         components
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID компонента"
+// @Param        updateData body ds.ComponentUpdateRequest true "Данные для обновления"
+// @Success      200 {object} ds.ComponentDTO
+// @Failure      400 {object} map[string]string "Ошибка валидации"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      403 {object} map[string]string "Доступ запрещен"
+// @Router       /components/{id} [put]
 func (h *Handler) UpdateComponent(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -135,6 +181,17 @@ func (h *Handler) UpdateComponent(c *gin.Context) {
 }
 
 // DELETE /api/components/:id - удаление компонента
+
+// DeleteComponent godoc
+// @Summary      Удалить компонент (только модератор)
+// @Description  Удаляет компонент системы охлаждения из системы.
+// @Tags         components
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID компонента для удаления"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      403 {object} map[string]string "Доступ запрещен"
+// @Router       /components/{id} [delete]
 func (h *Handler) DeleteComponent(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -152,7 +209,18 @@ func (h *Handler) DeleteComponent(c *gin.Context) {
 	})
 }
 
-// POST /api/coolrequest/draft/components/:component_id - добавление компонента в черновик
+// POST /api/coolrequests/draft/components/:component_id - добавление компонента в черновик
+
+// AddComponentToDraft godoc
+// @Summary      Добавить компонент в черновик заявки (все)
+// @Description  Находит или создает черновик заявки для текущего пользователя и добавляет в него компонент.
+// @Tags         components
+// @Security     ApiKeyAuth
+// @Param        component_id path int true "ID компонента для добавления"
+// @Success      201 {object} map[string]string "Сообщение об успехе"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      500 {object} map[string]string "Внутренняя ошибка сервера"
+// @Router       /coolrequests/draft/components/{component_id} [post]
 func (h *Handler) AddComponentToDraft(c *gin.Context) {
 	componentID, err := strconv.Atoi(c.Param("component_id"))
 	if err != nil {
@@ -160,17 +228,38 @@ func (h *Handler) AddComponentToDraft(c *gin.Context) {
 		return
 	}
 
-	if err := h.Repository.AddComponentToDraft(hardcodedUserID, uint(componentID)); err != nil {
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	if err := h.Repository.AddComponentToDraft(userID, uint(componentID)); err != nil {
 		h.errorHandler(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "Черновик создан. Компонент добавлен в черновик.",
+		"message": "Компонент добавлен в заявку",
 	})
 }
 
 // POST /api/components/:id/image - загрузка изображения компонента
+
+// UploadComponentImage godoc
+// @Summary      Загрузить изображение для компонента (только модератор)
+// @Description  Загружает и привязывает изображение к компоненту системы охлаждения.
+// @Tags         components
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID компонента"
+// @Param        file formData file true "Файл изображения"
+// @Success      200 {object} map[string]string "URL загруженного изображения"
+// @Failure      400 {object} map[string]string "Файл не предоставлен"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      403 {object} map[string]string "Доступ запрещен"
+// @Router       /components/{id}/image [post]
 func (h *Handler) UploadComponentImage(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

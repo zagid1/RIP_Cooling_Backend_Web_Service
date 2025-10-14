@@ -1,54 +1,76 @@
 package handler
 
 import (
+	"RIP/internal/app/config"
+	"RIP/internal/app/redis"
 	"RIP/internal/app/repository"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
-const hardcodedUserID = 1
-
 type Handler struct {
 	Repository *repository.Repository
+	Redis      *redis.Client
+	JWTConfig  *config.JWTConfig
 }
 
-func NewHandler(r *repository.Repository) *Handler {
+func NewHandler(r *repository.Repository, redis *redis.Client, jwtConfig *config.JWTConfig) *Handler {
 	return &Handler{
 		Repository: r,
+		Redis:      redis,
+		JWTConfig:  jwtConfig,
 	}
 }
 
 func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
-	// Домен компонентов
+
+	// Доступны всем
+	r.POST("/users", h.Register)
+	r.POST("/auth/login", h.Login)
 	r.GET("/components", h.GetComponents)
 	r.GET("/components/:id", h.GetComponent)
-	r.POST("/components", h.CreateComponent)
-	r.PUT("/components/:id", h.UpdateComponent)
-	r.DELETE("/components/:id", h.DeleteComponent)
-	r.POST("/coolrequest/draft/components/:component_id", h.AddComponentToDraft)
-	r.POST("/components/:id/image", h.UploadComponentImage)
 
-	// Домен заявок
-	r.GET("/coolrequests/cart", h.GetCartBadge)
-	r.GET("/coolrequests", h.ListRequests)
-	r.GET("/coolrequests/:id", h.GetRequest)
-	r.PUT("/coolrequests/:id", h.UpdateRequest)
-	r.PUT("/coolrequests/:id/form", h.FormRequest)
-	r.PUT("/coolrequests/:id/resolve", h.ResolveRequest)
-	r.DELETE("/coolrequests/:id", h.DeleteRequest)
+	// Эндпоинты, доступные только авторизованным пользователям
+	auth := r.Group("/")
+	auth.Use(h.AuthMiddleware)
+	{
+		// Пользователи
+		auth.POST("/auth/logout", h.Logout)
+		auth.GET("/users/:id", h.GetUserData)
+		auth.PUT("/users/:id", h.UpdateUserData)
 
-	// Домен м-м (компоненты в заявке)
-	r.DELETE("/coolrequests/:id/components/:component_id", h.RemoveComponentFromRequest)
-	r.PUT("/coolrequests/:id/components/:component_id", h.UpdateComponentInRequest)
-	//r.POST("/requests/draft/components/:component_id", h.AddComponentToDraft)
+		// Заявки
+		auth.POST("/coolrequest/draft/components/:component_id", h.AddComponentToDraft)
+		auth.GET("/coolrequests/coolcart", h.GetCartBadge)
+		auth.GET("/coolrequests", h.ListRequests)
+		auth.GET("/coolrequests/:id", h.GetRequest)
+		auth.PUT("/coolrequests/:id", h.UpdateRequest)
+		auth.PUT("/coolrequests/:id/form", h.FormRequest)
+		auth.DELETE("/coolrequests/:id", h.DeleteRequest)
+		auth.DELETE("/coolrequests/:id/components/:component_id", h.RemoveComponentFromRequest)
+		auth.PUT("/coolrequests/:id/components/:component_id", h.UpdateComponentInRequest)
+	}
 
+	// Эндпоинты, доступные только модераторам
+	moderator := r.Group("/")
+	moderator.Use(h.AuthMiddleware, h.ModeratorMiddleware)
+	{
+		// Управление компонентами (создание, изменение, удаление)
+		moderator.POST("/components", h.CreateComponent)
+		moderator.PUT("/components/:id", h.UpdateComponent)
+		moderator.DELETE("/components/:id", h.DeleteComponent)
+		moderator.POST("/components/:id/image", h.UploadComponentImage)
+
+		// Управление заявками (завершение/отклонение)
+		moderator.PUT("/coolrequests/:id/resolve", h.ResolveRequest)
+	}
 	// Домен пользователь
-	r.POST("/users", h.Register)
-	r.GET("/users/:id", h.GetUserData)
-	r.PUT("/users/:id", h.UpdateUserData)
-	r.POST("/auth/login", h.Login)
-	r.POST("/auth/logout", h.Logout)
+	// r.POST("/users", h.Register)
+	// r.GET("/users/:id", h.GetUserData)
+	// r.PUT("/users/:id", h.UpdateUserData)
+	// r.POST("/auth/login", h.Login)
+	// r.POST("/auth/logout", h.Logout)
 }
 
 func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error) {
@@ -85,105 +107,4 @@ func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error)
 // 	router.GET("/CoolRequest/:CoolRequest_id", h.GetCoolRequest)
 // 	router.POST("/CoolRequest/add/Component/:component_id", h.AddComponentToCoolRequest)
 // 	router.POST("/CoolRequest/:CoolRequest_id/delete", h.DeleteCoolRequest)
-// }
-
-// // RegisterStatic То же самое, что и с маршрутами, регистрируем статику
-// func (h *Handler) RegisterStatic(router *gin.Engine) {
-// 	router.LoadHTMLGlob("templates/*")
-// 	router.Static("/styles", "./resources/styles")
-// }
-
-// // errorHandler для более удобного вывода ошибок
-// func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error) {
-// 	logrus.Error(err.Error())
-// 	ctx.JSON(errorStatusCode, gin.H{
-// 		"status":      "error",
-// 		"description": err.Error(),
-// 	})
-// }
-
-// func (h *Handler) GetComponents(ctx *gin.Context) {
-// 	var components []repository.Component
-// 	var err error
-
-// 	searchQuery := ctx.Query("query")
-// 	if searchQuery == "" {
-// 		components, err = h.Repository.GetComponents()
-// 		if err != nil {
-// 			logrus.Error(err)
-// 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-// 			return
-// 		}
-// 	} else {
-// 		components, err = h.Repository.GetComponentsByTitle(searchQuery)
-// 		if err != nil {
-// 			logrus.Error(err)
-// 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-// 			return
-// 		}
-// 	}
-
-// 	ctx.HTML(http.StatusOK, "mainPage.html", gin.H{
-// 		"Components": components,
-// 		"query":      searchQuery,
-// 	})
-// }
-
-// func (h *Handler) GetComponent(ctx *gin.Context) {
-// 	idStr := ctx.Param("id")
-// 	id, err := strconv.Atoi(idStr)
-// 	if err != nil {
-// 		logrus.Error("Invalid ID:", err)
-// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
-// 		return
-// 	}
-
-// 	component, err := h.Repository.GetComponent(id)
-// 	if err != nil {
-// 		logrus.Error("Component not found:", err)
-// 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Component not found"})
-// 		return
-// 	}
-
-// 	ctx.HTML(http.StatusOK, "component.html", gin.H{
-// 		"Component": component,
-// 	})
-// }
-
-// // GetRequest - отображение статической заявки (аналог GetTask)
-// func (h *Handler) GetCoolTask(ctx *gin.Context) {
-// 	idStr := ctx.Param("id")
-
-// 	id, err := strconv.Atoi(idStr)
-// 	if err != nil {
-// 		logrus.Error("Invalid request ID:", err)
-// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request ID"})
-// 		return
-// 	}
-
-// 	request, err := h.Repository.GetRequest(id)
-// 	if err != nil {
-// 		logrus.Error("Request not found:", err)
-// 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Request not found"})
-// 		return
-// 	}
-
-// 	ctx.HTML(http.StatusOK, "task.html", gin.H{
-// 		"request": request,
-// 	})
-// }
-
-// RequestHandler - отображение страницы заявки
-// func (h *Handler) RequestHandler(ctx *gin.Context) {
-
-// 	request, err := h.Repository.GetRequest(1)
-// 	if err != nil {
-// 		logrus.Error("Request not found:", err)
-// 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Request not found"})
-// 		return
-// 	}
-
-// 	ctx.HTML(http.StatusOK, "request.html", gin.H{
-// 		"request": request,
-// 	})
 // }

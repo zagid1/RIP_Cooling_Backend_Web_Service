@@ -1,0 +1,884 @@
+basePath: /api
+definitions:
+  RIP_internal_app_ds.CartBadgeDTO:
+    properties:
+      count:
+        type: integer
+      request_id:
+        type: integer
+    type: object
+  RIP_internal_app_ds.ComponentCreateRequest:
+    properties:
+      description:
+        type: string
+      specifications:
+        items:
+          type: string
+        type: array
+      tdp:
+        type: integer
+      title:
+        type: string
+    required:
+    - description
+    - tdp
+    - title
+    type: object
+  RIP_internal_app_ds.ComponentDTO:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      specifications:
+        items:
+          type: string
+        type: array
+      status:
+        type: boolean
+      tdp:
+        type: integer
+      title:
+        type: string
+    type: object
+  RIP_internal_app_ds.ComponentInRequest:
+    properties:
+      component_id:
+        type: integer
+      count:
+        type: integer
+      description:
+        type: string
+      image_url:
+        type: string
+      specifications:
+        items:
+          type: string
+        type: array
+      tdp:
+        type: integer
+      title:
+        type: string
+    type: object
+  RIP_internal_app_ds.ComponentToRequestUpdateRequest:
+    properties:
+      count:
+        type: integer
+    type: object
+  RIP_internal_app_ds.ComponentUpdateRequest:
+    properties:
+      description:
+        type: string
+      specifications:
+        items:
+          type: string
+        type: array
+      tdp:
+        type: integer
+      title:
+        type: string
+    type: object
+  RIP_internal_app_ds.CoolRequestDTO:
+    properties:
+      completion_date:
+        type: string
+      components:
+        items:
+          $ref: '#/definitions/RIP_internal_app_ds.ComponentInRequest'
+        type: array
+      cooling_power:
+        type: number
+      creation_date:
+        type: string
+      creator_id:
+        type: integer
+      forming_date:
+        type: string
+      id:
+        type: integer
+      moderator_id:
+        type: integer
+      room_area:
+        type: number
+      room_height:
+        type: number
+      status:
+        type: integer
+    type: object
+  RIP_internal_app_ds.CoolRequestResolveRequest:
+    properties:
+      action:
+        description: '"complete" | "reject"'
+        type: string
+    required:
+    - action
+    type: object
+  RIP_internal_app_ds.CoolRequestUpdateRequest:
+    properties:
+      room_area:
+        type: number
+      room_height:
+        type: number
+    type: object
+  RIP_internal_app_ds.LoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/RIP_internal_app_ds.UserDTO'
+    type: object
+  RIP_internal_app_ds.PaginatedResponse:
+    properties:
+      items: {}
+      total:
+        type: integer
+    type: object
+  RIP_internal_app_ds.UserDTO:
+    properties:
+      full_name:
+        type: string
+      id:
+        type: integer
+      moderator:
+        type: boolean
+      username:
+        type: string
+    type: object
+  RIP_internal_app_ds.UserLoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  RIP_internal_app_ds.UserRegisterRequest:
+    properties:
+      full_name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - full_name
+    - password
+    - username
+    type: object
+  RIP_internal_app_ds.UserUpdateRequest:
+    properties:
+      full_name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: API-сервер для управления заявками и компонентами серверов в системе
+    CoolRequest.
+  title: API для системы FRAX
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Получение JWT токена по логину и паролю для доступа к защищенным
+        эндпоинтам.
+      parameters:
+      - description: Учетные данные пользователя
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/RIP_internal_app_ds.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/RIP_internal_app_ds.LoginResponse'
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Неверные учетные данные
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Аутентификация пользователя (все)
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      description: Добавляет текущий JWT токен в черный список, делая его недействительным.
+        Требует авторизации.
+      responses:
+        "200":
+          description: Сообщение об успехе
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Выход из системы (авторизованный пользователь)
+      tags:
+      - auth
+  /components:
+    get:
+      description: Возвращает постраничный список компонентов системы охлаждения.
+      parameters:
+      - description: Фильтр по названию компонента
+        in: query
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/RIP_internal_app_ds.PaginatedResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить список компонентов (все)
+      tags:
+      - components
+    post:
+      consumes:
+      - application/json
+      description: Создает новую запись о компоненте системы охлаждения.
+      parameters:
+      - description: Данные нового компонента
+        in: body
+        name: componentData
+        required: true
+        schema:
+          $ref: '#/definitions/RIP_internal_app_ds.ComponentCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/RIP_internal_app_ds.ComponentDTO'
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен (не модератор)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Создать новый компонент (только модератор)
+      tags:
+      - components
+  /components/{id}:
+    delete:
+      description: Удаляет компонент системы охлаждения из системы.
+      parameters:
+      - description: ID компонента для удаления
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить компонент (только модератор)
+      tags:
+      - components
+    get:
+      description: Возвращает детальную информацию о компоненте системы охлаждения.
+      parameters:
+      - description: ID компонента
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/RIP_internal_app_ds.ComponentDTO'
+        "404":
+          description: Компонент не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить один компонент по ID (все)
+      tags:
+      - components
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию о существующем компоненте системы охлаждения.
+      parameters:
+      - description: ID компонента
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: updateData
+        required: true
+        schema:
+          $ref: '#/definitions/RIP_internal_app_ds.ComponentUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/RIP_internal_app_ds.ComponentDTO'
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить компонент (только модератор)
+      tags:
+      - components
+  /components/{id}/image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает и привязывает изображение к компоненту системы охлаждения.
+      parameters:
+      - description: ID компонента
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Файл изображения
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: URL загруженного изображения
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Файл не предоставлен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Загрузить изображение для компонента (только модератор)
+      tags:
+      - components
+  /coolrequests:
+    get:
+      description: Возвращает отфильтрованный список всех сформированных заявок (кроме
+        черновиков и удаленных).
+      parameters:
+      - description: Фильтр по статусу заявки
+        in: query
+        name: status
+        type: integer
+      - description: Фильтр по дате 'от' (формат YYYY-MM-DD)
+        in: query
+        name: from
+        type: string
+      - description: Фильтр по дате 'до' (формат YYYY-MM-DD)
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/RIP_internal_app_ds.CoolRequestDTO'
+            type: array
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить список заявок (авторизованный пользователь)
+      tags:
+      - coolrequests
+  /coolrequests/{id}:
+    delete:
+      description: Логически удаляет заявку, переводя ее в статус "удалена".
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить заявку (авторизованный пользователь)
+      tags:
+      - coolrequests
+    get:
+      description: Возвращает полную информацию о заявке, включая привязанные компоненты.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/RIP_internal_app_ds.CoolRequestDTO'
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Заявка не найдена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить одну заявку по ID (авторизованный пользователь)
+      tags:
+      - coolrequests
+    put:
+      consumes:
+      - application/json
+      description: Позволяет пользователю обновить поля своей заявки (площадь помещения,
+        высота помещения).
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: updateData
+        required: true
+        schema:
+          $ref: '#/definitions/RIP_internal_app_ds.CoolRequestUpdateRequest'
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить данные заявки (авторизованный пользователь)
+      tags:
+      - coolrequests
+  /coolrequests/{id}/components/{component_id}:
+    delete:
+      description: Удаляет связь между заявкой и компонентом.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID компонента
+        in: path
+        name: component_id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить компонент из заявки (авторизованный пользователь)
+      tags:
+      - m-m
+    put:
+      consumes:
+      - application/json
+      description: Изменяет количество конкретного компонента в рамках одной заявки.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID компонента
+        in: path
+        name: component_id
+        required: true
+        type: integer
+      - description: Новое количество
+        in: body
+        name: updateData
+        required: true
+        schema:
+          $ref: '#/definitions/RIP_internal_app_ds.ComponentToRequestUpdateRequest'
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить количество компонента в заявке (авторизованный пользователь)
+      tags:
+      - m-m
+  /coolrequests/{id}/form:
+    put:
+      description: Переводит заявку из статуса "черновик" в "сформирована" и рассчитывает
+        мощность охлаждения.
+      parameters:
+      - description: ID заявки (черновика)
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Не все поля заполнены
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Сформировать заявку (авторизованный пользователь)
+      tags:
+      - coolrequests
+  /coolrequests/{id}/resolve:
+    put:
+      consumes:
+      - application/json
+      description: Модератор завершает или отклоняет заявку системы охлаждения.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 'Действие: ''complete'' или ''reject'''
+        in: body
+        name: action
+        required: true
+        schema:
+          $ref: '#/definitions/RIP_internal_app_ds.CoolRequestResolveRequest'
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Завершить или отклонить заявку (только модератор)
+      tags:
+      - coolrequests
+  /coolrequests/coolcart:
+    get:
+      description: Возвращает ID черновика текущего пользователя и количество компонентов
+        в нем.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/RIP_internal_app_ds.CartBadgeDTO'
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить информацию для иконки корзины (авторизованный пользователь)
+      tags:
+      - coolrequests
+  /coolrequests/draft/components/{component_id}:
+    post:
+      description: Находит или создает черновик заявки для текущего пользователя и
+        добавляет в него компонент.
+      parameters:
+      - description: ID компонента для добавления
+        in: path
+        name: component_id
+        required: true
+        type: integer
+      responses:
+        "201":
+          description: Сообщение об успехе
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Добавить компонент в черновик заявки (все)
+      tags:
+      - components
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя в системе. По умолчанию роль "пользователь",
+        не "модератор".
+      parameters:
+      - description: Данные для регистрации
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/RIP_internal_app_ds.UserRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/RIP_internal_app_ds.UserDTO'
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Регистрация нового пользователя (все)
+      tags:
+      - auth
+  /users/{id}:
+    get:
+      description: Возвращает публичные данные пользователя. Требует авторизации.
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/RIP_internal_app_ds.UserDTO'
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получение данных пользователя по ID (авторизованный пользователь)
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Обновляет имя пользователя или пароль. Требует авторизации.
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: updateData
+        required: true
+        schema:
+          $ref: '#/definitions/RIP_internal_app_ds.UserUpdateRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновление данных пользователя (авторизованный пользователь)
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
