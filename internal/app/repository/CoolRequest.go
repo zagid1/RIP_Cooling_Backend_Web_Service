@@ -37,11 +37,15 @@ func (r *Repository) GetRequestWithComponents(requestID uint) (*ds.CoolRequest, 
 }
 
 // GET /api/requests - список заявок с фильтрацией
-func (r *Repository) RequestsListFiltered(status, from, to string) ([]ds.CoolRequestDTO, error) {
+func (r *Repository) RequestsListFiltered(userID uint, isModerator bool, status, from, to string) ([]ds.CoolRequestDTO, error) {
 	var requestLIst []ds.CoolRequest
 	query := r.db.Preload("Creator").Preload("Moderator")
 
 	query = query.Where("status != ? AND status != ?", ds.StatusDeleted, ds.StatusDraft)
+
+	if !isModerator {
+		query = query.Where("creator_id = ?", userID)
+	}
 
 	if status != "" {
 		if statusInt, err := strconv.Atoi(status); err == nil {

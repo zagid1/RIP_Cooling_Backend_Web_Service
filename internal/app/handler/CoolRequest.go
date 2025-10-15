@@ -65,11 +65,17 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 // @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Router       /coolrequests [get]
 func (h *Handler) ListRequests(c *gin.Context) {
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+	isModerator := isUserModerator(c)
 	status := c.Query("status")
 	from := c.Query("from")
 	to := c.Query("to")
 
-	requests, err := h.Repository.RequestsListFiltered(status, from, to)
+	requests, err := h.Repository.RequestsListFiltered(userID, isModerator, status, from, to)
 	if err != nil {
 		h.errorHandler(c, http.StatusInternalServerError, err)
 		return

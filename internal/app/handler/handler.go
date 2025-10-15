@@ -40,7 +40,7 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 		auth.GET("/users/:id", h.GetUserData)
 		auth.PUT("/users/:id", h.UpdateUserData)
 
-		// Заявки
+		// Заявки, доступно только авторизованным пользователям
 		auth.POST("/coolrequest/draft/components/:component_id", h.AddComponentToDraft)
 		auth.GET("/coolrequests/coolcart", h.GetCartBadge)
 		auth.GET("/coolrequests", h.ListRequests)
