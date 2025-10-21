@@ -2,13 +2,34 @@ package repository
 
 import (
 	"RIP/internal/app/ds"
+	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 // POST /api/users - регистрация пользователя
 func (r *Repository) CreateUser(user *ds.Users) error {
-	return r.db.Create(user).Error
+	// Проверяем существование пользователя с таким username
+	var count int64
+	if err := r.db.Model(&ds.Users{}).Where("username = ?", user.Username).Count(&count).Error; err != nil {
+		return fmt.Errorf("%w: %v", ds.ErrDatabase, err)
+	}
+
+	if count > 0 {
+		return ds.ErrUsernameExists
+	}
+
+	// Создаем пользователя
+	if err := r.db.Create(user).Error; err != nil {
+		// // Дополнительная проверка на случай race condition
+		// if errors.Is(err, gorm.ErrDuplicatedKey) ||
+		//    errors.Is(err, gorm.ErrUniqueViolated) {
+		// 	return ds.ErrUsernameExists
+		// }
+		return fmt.Errorf("%w: %v", ds.ErrDatabase, err)
+	}
+
+	return nil
 }
 
 // GET /api/users/:id - получение данных пользователя

@@ -2,10 +2,12 @@ package handler
 
 import (
 	"RIP/internal/app/ds"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // GET /api/coolrequests/coolcart - иконка корзины
@@ -35,7 +37,7 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 		return
 	}
 
-	fullRequest, err := h.Repository.GetRequestWithComponents(draft.ID)
+	fullRequest, err := h.Repository.GetRequestWithComponents(draft.ID, userID, false)
 	if err != nil {
 		c.JSON(http.StatusOK, ds.CartBadgeDTO{
 			RequestID: nil,
@@ -103,8 +105,13 @@ func (h *Handler) GetRequest(c *gin.Context) {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
-
-	coolrequest, err := h.Repository.GetRequestWithComponents(uint(id))
+	isModerator := isUserModerator(c)
+	UserID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+	coolrequest, err := h.Repository.GetRequestWithComponents(uint(id), UserID, isModerator)
 	if err != nil {
 		h.errorHandler(c, http.StatusNotFound, err)
 		return
@@ -113,13 +120,13 @@ func (h *Handler) GetRequest(c *gin.Context) {
 	var components []ds.ComponentInRequest
 	for _, link := range coolrequest.ComponentLink {
 		components = append(components, ds.ComponentInRequest{
-			ComponentID:    link.Component.ID,
-			Title:          link.Component.Title,
-			Description:    link.Component.Description,
-			Specifications: link.Component.Specifications,
-			TDP:            link.Component.TDP,
-			ImageURL:       link.Component.ImageURL,
-			Count:          link.Count,
+			ComponentID: link.Component.ID,
+			Title:       link.Component.Title,
+			Description: link.Component.Description,
+			//Specifications: link.Component.Specifications,
+			TDP:      link.Component.TDP,
+			ImageURL: link.Component.ImageURL,
+			Count:    link.Count,
 		})
 	}
 
@@ -163,7 +170,25 @@ func (h *Handler) UpdateRequest(c *gin.Context) {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
+	//isModerator := isUserModerator(c)
+	UserID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+	coolrequest, err := h.Repository.GetRequestWithComponents(uint(id), UserID, false)
 
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			h.errorHandler(c, http.StatusForbidden, errors.New("access denied or request not found"))
+		} else {
+			h.errorHandler(c, http.StatusNotFound, err)
+		}
+		return
+	}
+
+	if coolrequest.ID == 0 {
+	}
 	var req ds.CoolRequestUpdateRequest
 	if err := c.BindJSON(&req); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)

@@ -8,13 +8,13 @@ import (
 
 // Component DTOs
 type ComponentDTO struct {
-	ID             uint           `json:"id"`
-	Title          string         `json:"title"`
-	Description    string         `json:"description"`
-	Specifications pq.StringArray `json:"specifications"`
-	TDP            int            `json:"tdp"`
-	ImageURL       *string        `json:"image_url"`
-	Status         bool           `json:"status"`
+	ID          uint   `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	//Specifications pq.StringArray `json:"specifications"`
+	TDP      int     `json:"tdp"`
+	ImageURL *string `json:"image_url"`
+	Status   bool    `json:"status"`
 }
 
 type ComponentCreateRequest struct {
@@ -25,10 +25,10 @@ type ComponentCreateRequest struct {
 }
 
 type ComponentUpdateRequest struct {
-	Title          *string        `json:"title"`
-	Description    *string        `json:"description"`
-	Specifications pq.StringArray `json:"specifications"`
-	TDP            *int           `json:"tdp"`
+	Title       *string `json:"title"`
+	Description *string `json:"description"`
+	//Specifications pq.StringArray `json:"specifications"`
+	TDP *int `json:"tdp"`
 	// ImageURL       *string        `json:"image_url"`
 	// Status         *bool          `json:"status"`
 }
@@ -49,13 +49,13 @@ type CoolRequestDTO struct {
 }
 
 type ComponentInRequest struct {
-	ComponentID    uint           `json:"component_id"`
-	Title          string         `json:"title"`
-	Description    string         `json:"description"`
-	Specifications pq.StringArray `json:"specifications"`
-	TDP            int            `json:"tdp"`
-	ImageURL       *string        `json:"image_url"`
-	Count          uint           `json:"count"`
+	ComponentID uint   `json:"component_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	//Specifications pq.StringArray `json:"specifications"`
+	TDP      int     `json:"tdp"`
+	ImageURL *string `json:"image_url"`
+	Count    uint    `json:"count"`
 }
 
 type CoolRequestUpdateRequest struct {
@@ -73,7 +73,7 @@ type ComponentToRequestUpdateRequest struct {
 
 // Cart DTO
 type CartBadgeDTO struct {
-	RequestID *uint `json:"request_id"`
+	RequestID *uint `json:"coolrequest_id"`
 	Count     int   `json:"count"`
 }
 

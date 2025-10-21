@@ -34,7 +34,7 @@ func (h *Handler) GetComponents(c *gin.Context) {
 			ID:             comp.ID,
 			Title:          comp.Title,
 			Description:    comp.Description,
-			Specifications: comp.Specifications,
+			//Specifications: comp.Specifications,
 			TDP:            comp.TDP,
 			ImageURL:       comp.ImageURL,
 			Status:         comp.Status,
@@ -75,7 +75,7 @@ func (h *Handler) GetComponent(c *gin.Context) {
 		ID:             component.ID,
 		Title:          component.Title,
 		Description:    component.Description,
-		Specifications: component.Specifications,
+		//Specifications: component.Specifications,
 		TDP:            component.TDP,
 		ImageURL:       component.ImageURL,
 		Status:         component.Status,
@@ -109,7 +109,7 @@ func (h *Handler) CreateComponent(c *gin.Context) {
 	component := ds.Component{
 		Title:          req.Title,
 		Description:    req.Description,
-		Specifications: req.Specifications,
+		//Specifications: req.Specifications,
 		TDP:            req.TDP,
 		Status:         true, // по умолчанию активен
 	}
@@ -123,7 +123,7 @@ func (h *Handler) CreateComponent(c *gin.Context) {
 		ID:             component.ID,
 		Title:          component.Title,
 		Description:    component.Description,
-		Specifications: component.Specifications,
+		//Specifications: component.Specifications,
 		TDP:            component.TDP,
 		ImageURL:       component.ImageURL,
 		Status:         component.Status,
@@ -171,7 +171,7 @@ func (h *Handler) UpdateComponent(c *gin.Context) {
 		ID:             component.ID,
 		Title:          component.Title,
 		Description:    component.Description,
-		Specifications: component.Specifications,
+		//Specifications: component.Specifications,
 		TDP:            component.TDP,
 		ImageURL:       component.ImageURL,
 		Status:         component.Status,
@@ -212,7 +212,7 @@ func (h *Handler) DeleteComponent(c *gin.Context) {
 // POST /api/coolrequests/draft/components/:component_id - добавление компонента в черновик
 
 // AddComponentToDraft godoc
-// @Summary      Добавить компонент в черновик заявки (все)
+// @Summary      Добавить компонент в черновик заявки (авторизованный пользователь)
 // @Description  Находит или создает черновик заявки для текущего пользователя и добавляет в него компонент.
 // @Tags         components
 // @Security     ApiKeyAuth

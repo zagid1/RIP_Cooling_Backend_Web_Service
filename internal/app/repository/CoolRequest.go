@@ -22,9 +22,20 @@ func (r *Repository) GetDraftRequest(userID uint) (*ds.CoolRequest, error) {
 }
 
 // GET /api/requests/:id - одна заявка с компонентами
-func (r *Repository) GetRequestWithComponents(requestID uint) (*ds.CoolRequest, error) {
+func (r *Repository) GetRequestWithComponents(requestID uint, UserID uint, isModerator bool) (*ds.CoolRequest, error) {
 	var CoolRequest ds.CoolRequest
-	err := r.db.Preload("ComponentLink.Component").Preload("Creator").Preload("Moderator").First(&CoolRequest, requestID).Error
+	var err error
+
+	// Базовый запрос с предзагрузкой связей
+	query := r.db.Preload("ComponentLink.Component").Preload("Creator").Preload("Moderator")
+
+	if !isModerator {
+		// Для обычных пользователей - только их запросы
+		err = query.Where("id = ? AND creator_id = ?", requestID, UserID).First(&CoolRequest).Error
+	} else {
+		// Для модераторов - любой запрос
+		err = query.First(&CoolRequest, requestID).Error
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +43,6 @@ func (r *Repository) GetRequestWithComponents(requestID uint) (*ds.CoolRequest, 
 	if CoolRequest.Status == ds.StatusDeleted {
 		return nil, errors.New("coolrequest page not found or has been deleted")
 	}
-
 	return &CoolRequest, nil
 }
 

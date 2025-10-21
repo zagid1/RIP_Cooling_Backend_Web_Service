@@ -67,9 +67,9 @@ func (r *Repository) UpdateComponent(id uint, req ds.ComponentUpdateRequest) (*d
 	if req.Description != nil {
 		component.Description = *req.Description
 	}
-	if req.Specifications != nil {
-		component.Specifications = req.Specifications
-	}
+	// if req.Specifications != nil {
+	// 	component.Specifications = req.Specifications
+	// }
 	if req.TDP != nil {
 		component.TDP = *req.TDP
 	}

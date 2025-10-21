@@ -534,7 +534,7 @@ const docTemplate = `{
                 "tags": [
                     "components"
                 ],
-                "summary": "Добавить компонент в черновик заявки (все)",
+                "summary": "Добавить компонент в черновик заявки (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
