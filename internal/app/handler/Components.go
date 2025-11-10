@@ -31,13 +31,13 @@ func (h *Handler) GetComponents(c *gin.Context) {
 	var componentDTOs []ds.ComponentDTO
 	for _, comp := range components {
 		componentDTOs = append(componentDTOs, ds.ComponentDTO{
-			ID:             comp.ID,
-			Title:          comp.Title,
-			Description:    comp.Description,
+			ID:          comp.ID,
+			Title:       comp.Title,
+			Description: comp.Description,
 			//Specifications: comp.Specifications,
-			TDP:            comp.TDP,
-			ImageURL:       comp.ImageURL,
-			Status:         comp.Status,
+			TDP:      comp.TDP,
+			ImageURL: comp.ImageURL,
+			Status:   comp.Status,
 		})
 	}
 
@@ -72,13 +72,13 @@ func (h *Handler) GetComponent(c *gin.Context) {
 	}
 
 	componentDTO := ds.ComponentDTO{
-		ID:             component.ID,
-		Title:          component.Title,
-		Description:    component.Description,
+		ID:          component.ID,
+		Title:       component.Title,
+		Description: component.Description,
 		//Specifications: component.Specifications,
-		TDP:            component.TDP,
-		ImageURL:       component.ImageURL,
-		Status:         component.Status,
+		TDP:      component.TDP,
+		ImageURL: component.ImageURL,
+		Status:   component.Status,
 	}
 
 	c.JSON(http.StatusOK, componentDTO)
@@ -107,11 +107,11 @@ func (h *Handler) CreateComponent(c *gin.Context) {
 	}
 
 	component := ds.Component{
-		Title:          req.Title,
-		Description:    req.Description,
+		Title:       req.Title,
+		Description: req.Description,
 		//Specifications: req.Specifications,
-		TDP:            req.TDP,
-		Status:         true, // по умолчанию активен
+		TDP:    req.TDP,
+		Status: true, // по умолчанию активен
 	}
 
 	if err := h.Repository.CreateComponent(&component); err != nil {
@@ -120,13 +120,13 @@ func (h *Handler) CreateComponent(c *gin.Context) {
 	}
 
 	componentDTO := ds.ComponentDTO{
-		ID:             component.ID,
-		Title:          component.Title,
-		Description:    component.Description,
+		ID:          component.ID,
+		Title:       component.Title,
+		Description: component.Description,
 		//Specifications: component.Specifications,
-		TDP:            component.TDP,
-		ImageURL:       component.ImageURL,
-		Status:         component.Status,
+		TDP:      component.TDP,
+		ImageURL: component.ImageURL,
+		Status:   component.Status,
 	}
 
 	c.JSON(http.StatusCreated, componentDTO)
@@ -168,13 +168,13 @@ func (h *Handler) UpdateComponent(c *gin.Context) {
 	}
 
 	componentDTO := ds.ComponentDTO{
-		ID:             component.ID,
-		Title:          component.Title,
-		Description:    component.Description,
+		ID:          component.ID,
+		Title:       component.Title,
+		Description: component.Description,
 		//Specifications: component.Specifications,
-		TDP:            component.TDP,
-		ImageURL:       component.ImageURL,
-		Status:         component.Status,
+		TDP:      component.TDP,
+		ImageURL: component.ImageURL,
+		Status:   component.Status,
 	}
 
 	c.JSON(http.StatusOK, componentDTO)
@@ -209,7 +209,7 @@ func (h *Handler) DeleteComponent(c *gin.Context) {
 	})
 }
 
-// POST /api/coolrequests/draft/components/:component_id - добавление компонента в черновик
+// POST /api/cooling/draft/components/:component_id - добавление компонента в черновик
 
 // AddComponentToDraft godoc
 // @Summary      Добавить компонент в черновик заявки (авторизованный пользователь)
@@ -220,7 +220,7 @@ func (h *Handler) DeleteComponent(c *gin.Context) {
 // @Success      201 {object} map[string]string "Сообщение об успехе"
 // @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Failure      500 {object} map[string]string "Внутренняя ошибка сервера"
-// @Router       /coolrequests/draft/components/{component_id} [post]
+// @Router       /cooling/draft/components/{component_id} [post]
 func (h *Handler) AddComponentToDraft(c *gin.Context) {
 	componentID, err := strconv.Atoi(c.Param("component_id"))
 	if err != nil {
@@ -314,12 +314,12 @@ func (h *Handler) UploadComponentImage(c *gin.Context) {
 // 	}
 
 // 	// Получаем черновик заявки для отображения корзины
-// 	draftRequest, err := h.Repository.GetDraftCoolRequest(hardcodedUserID)
+// 	draftRequest, err := h.Repository.GetDraftCooling(hardcodedUserID)
 // 	var requestID uint = 0
 // 	var componentsCount int = 0
 
 // 	if err == nil && draftRequest != nil {
-// 		fullRequest, err := h.Repository.GetCoolRequestWithComponents(draftRequest.ID)
+// 		fullRequest, err := h.Repository.GetCoolingWithComponents(draftRequest.ID)
 // 		if err == nil {
 // 			requestID = fullRequest.ID
 // 			componentsCount = len(fullRequest.ComponentLink)

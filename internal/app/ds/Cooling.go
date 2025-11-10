@@ -3,7 +3,7 @@ package ds
 import "time"
 
 // Requests соответствует таблице "requests" - заявки на расчет системы охлаждения
-type CoolRequest struct {
+type Cooling struct {
 	ID             uint       `gorm:"primaryKey;column:id"`
 	Status         int        `gorm:"column:status;not null"` // 1-черновик, 2-удален, 3-сформирован, 4-завершен, 5-отклонен
 	CreationDate   time.Time  `gorm:"column:creation_date;not null"`
@@ -25,5 +25,9 @@ type CoolRequest struct {
 	Moderator *Users `gorm:"foreignKey:ModeratorID"`
 
 	// Отношение "один-ко-многим" к связующей таблице:
-	ComponentLink []ComponentToRequest `gorm:"foreignKey:CoolRequestID"`
+	ComponentLink []ComponentToCooling `gorm:"foreignKey:CoolingID"`
+}
+
+func (Cooling) TableName() string {
+	return "cooling"
 }

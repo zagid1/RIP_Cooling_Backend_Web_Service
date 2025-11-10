@@ -28,7 +28,7 @@ func main() {
 		panic("failed to connect database: " + err.Error())
 	}
 
-	err = db.AutoMigrate(&ds.Component{}, &ds.CoolRequest{}, &ds.ComponentToRequest{}, &ds.Users{})
+	err = db.AutoMigrate(&ds.Component{}, &ds.Cooling{}, &ds.ComponentToCooling{}, &ds.Users{})
 	if err != nil {
 		panic("cant migrate db: " + err.Error())
 	}

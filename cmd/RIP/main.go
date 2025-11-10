@@ -14,9 +14,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// @title           API для системы FRAX
+// @title           API для системы CoolingSystems
 // @version         1.0
-// @description     API-сервер для управления заявками и компонентами серверов в системе CoolRequest.
+// @description     API-сервер для управления заявками и компонентами серверов в системе CoolingSystems.
 // @contact.name    API Support
 // @contact.email   support@example.com
 // @host            localhost:8080

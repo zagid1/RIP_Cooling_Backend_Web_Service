@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API-сервер для управления заявками и компонентами серверов в системе CoolRequest.",
+        "description": "API-сервер для управления заявками и компонентами серверов в системе Cooling.",
         "title": "API для системы FRAX",
         "contact": {
             "name": "API Support",
@@ -426,7 +426,7 @@
                 }
             }
         },
-        "/coolrequests": {
+        "/cooling": {
             "get": {
                 "security": [
                     {
@@ -438,7 +438,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Получить список заявок (авторизованный пользователь)",
                 "parameters": [
@@ -467,7 +467,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/RIP_internal_app_ds.CoolRequestDTO"
+                                "$ref": "#/definitions/RIP_internal_app_ds.CoolingDTO"
                             }
                         }
                     },
@@ -483,7 +483,7 @@
                 }
             }
         },
-        "/coolrequests/coolcart": {
+        "/cooling/coolcart": {
             "get": {
                 "security": [
                     {
@@ -495,7 +495,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Получить информацию для иконки корзины (авторизованный пользователь)",
                 "responses": {
@@ -517,7 +517,7 @@
                 }
             }
         },
-        "/coolrequests/draft/components/{component_id}": {
+        "/cooling/draft/components/{component_id}": {
             "post": {
                 "security": [
                     {
@@ -569,7 +569,7 @@
                 }
             }
         },
-        "/coolrequests/{id}": {
+        "/cooling/{id}": {
             "get": {
                 "security": [
                     {
@@ -581,7 +581,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Получить одну заявку по ID (авторизованный пользователь)",
                 "parameters": [
@@ -597,7 +597,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.CoolRequestDTO"
+                            "$ref": "#/definitions/RIP_internal_app_ds.CoolingDTO"
                         }
                     },
                     "401": {
@@ -631,7 +631,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Обновить данные заявки (авторизованный пользователь)",
                 "parameters": [
@@ -648,7 +648,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.CoolRequestUpdateRequest"
+                            "$ref": "#/definitions/RIP_internal_app_ds.CoolingUpdateRequest"
                         }
                     }
                 ],
@@ -675,7 +675,7 @@
                 ],
                 "description": "Логически удаляет заявку, переводя ее в статус \"удалена\".",
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Удалить заявку (авторизованный пользователь)",
                 "parameters": [
@@ -703,7 +703,7 @@
                 }
             }
         },
-        "/coolrequests/{id}/components/{component_id}": {
+        "/cooling/{id}/components/{component_id}": {
             "put": {
                 "security": [
                     {
@@ -739,7 +739,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.ComponentToRequestUpdateRequest"
+                            "$ref": "#/definitions/RIP_internal_app_ds.ComponentToCoolingUpdateRequest"
                         }
                     }
                 ],
@@ -801,7 +801,7 @@
                 }
             }
         },
-        "/coolrequests/{id}/form": {
+        "/cooling/{id}/form": {
             "put": {
                 "security": [
                     {
@@ -810,7 +810,7 @@
                 ],
                 "description": "Переводит заявку из статуса \"черновик\" в \"сформирована\" и рассчитывает мощность охлаждения.",
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Сформировать заявку (авторизованный пользователь)",
                 "parameters": [
@@ -847,7 +847,7 @@
                 }
             }
         },
-        "/coolrequests/{id}/resolve": {
+        "/cooling/{id}/resolve": {
             "put": {
                 "security": [
                     {
@@ -859,7 +859,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Завершить или отклонить заявку (только модератор)",
                 "parameters": [
@@ -876,7 +876,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.CoolRequestResolveRequest"
+                            "$ref": "#/definitions/RIP_internal_app_ds.CoolingResolveRequest"
                         }
                     }
                 ],
@@ -1170,7 +1170,7 @@
                 }
             }
         },
-        "RIP_internal_app_ds.ComponentToRequestUpdateRequest": {
+        "RIP_internal_app_ds.ComponentToCoolingUpdateRequest": {
             "type": "object",
             "properties": {
                 "count": {
@@ -1198,7 +1198,7 @@
                 }
             }
         },
-        "RIP_internal_app_ds.CoolRequestDTO": {
+        "RIP_internal_app_ds.CoolingDTO": {
             "type": "object",
             "properties": {
                 "completion_date": {
@@ -1239,7 +1239,7 @@
                 }
             }
         },
-        "RIP_internal_app_ds.CoolRequestResolveRequest": {
+        "RIP_internal_app_ds.CoolingResolveRequest": {
             "type": "object",
             "required": [
                 "action"
@@ -1251,7 +1251,7 @@
                 }
             }
         },
-        "RIP_internal_app_ds.CoolRequestUpdateRequest": {
+        "RIP_internal_app_ds.CoolingUpdateRequest": {
             "type": "object",
             "properties": {
                 "room_area": {

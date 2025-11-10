@@ -62,7 +62,7 @@ definitions:
       title:
         type: string
     type: object
-  RIP_internal_app_ds.ComponentToRequestUpdateRequest:
+  RIP_internal_app_ds.ComponentToCoolingUpdateRequest:
     properties:
       count:
         type: integer
@@ -80,7 +80,7 @@ definitions:
       title:
         type: string
     type: object
-  RIP_internal_app_ds.CoolRequestDTO:
+  RIP_internal_app_ds.CoolingDTO:
     properties:
       completion_date:
         type: string
@@ -107,7 +107,7 @@ definitions:
       status:
         type: integer
     type: object
-  RIP_internal_app_ds.CoolRequestResolveRequest:
+  RIP_internal_app_ds.CoolingResolveRequest:
     properties:
       action:
         description: '"complete" | "reject"'
@@ -115,7 +115,7 @@ definitions:
     required:
     - action
     type: object
-  RIP_internal_app_ds.CoolRequestUpdateRequest:
+  RIP_internal_app_ds.CoolingUpdateRequest:
     properties:
       room_area:
         type: number
@@ -184,7 +184,7 @@ info:
     email: support@example.com
     name: API Support
   description: API-сервер для управления заявками и компонентами серверов в системе
-    CoolRequest.
+    Cooling.
   title: API для системы FRAX
   version: "1.0"
 paths:
@@ -457,7 +457,7 @@ paths:
       summary: Загрузить изображение для компонента (только модератор)
       tags:
       - components
-  /coolrequests:
+  /cooling:
     get:
       description: Возвращает отфильтрованный список всех сформированных заявок (кроме
         черновиков и удаленных).
@@ -481,7 +481,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/RIP_internal_app_ds.CoolRequestDTO'
+              $ref: '#/definitions/RIP_internal_app_ds.CoolingDTO'
             type: array
         "401":
           description: Необходима авторизация
@@ -493,8 +493,8 @@ paths:
       - ApiKeyAuth: []
       summary: Получить список заявок (авторизованный пользователь)
       tags:
-      - coolrequests
-  /coolrequests/{id}:
+      - cooling
+  /cooling/{id}:
     delete:
       description: Логически удаляет заявку, переводя ее в статус "удалена".
       parameters:
@@ -516,7 +516,7 @@ paths:
       - ApiKeyAuth: []
       summary: Удалить заявку (авторизованный пользователь)
       tags:
-      - coolrequests
+      - cooling
     get:
       description: Возвращает полную информацию о заявке, включая привязанные компоненты.
       parameters:
@@ -531,7 +531,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/RIP_internal_app_ds.CoolRequestDTO'
+            $ref: '#/definitions/RIP_internal_app_ds.CoolingDTO'
         "401":
           description: Необходима авторизация
           schema:
@@ -548,7 +548,7 @@ paths:
       - ApiKeyAuth: []
       summary: Получить одну заявку по ID (авторизованный пользователь)
       tags:
-      - coolrequests
+      - cooling
     put:
       consumes:
       - application/json
@@ -565,7 +565,7 @@ paths:
         name: updateData
         required: true
         schema:
-          $ref: '#/definitions/RIP_internal_app_ds.CoolRequestUpdateRequest'
+          $ref: '#/definitions/RIP_internal_app_ds.CoolingUpdateRequest'
       responses:
         "204":
           description: No Content
@@ -579,8 +579,8 @@ paths:
       - ApiKeyAuth: []
       summary: Обновить данные заявки (авторизованный пользователь)
       tags:
-      - coolrequests
-  /coolrequests/{id}/components/{component_id}:
+      - cooling
+  /cooling/{id}/components/{component_id}:
     delete:
       description: Удаляет связь между заявкой и компонентом.
       parameters:
@@ -628,7 +628,7 @@ paths:
         name: updateData
         required: true
         schema:
-          $ref: '#/definitions/RIP_internal_app_ds.ComponentToRequestUpdateRequest'
+          $ref: '#/definitions/RIP_internal_app_ds.ComponentToCoolingUpdateRequest'
       responses:
         "204":
           description: No Content
@@ -643,7 +643,7 @@ paths:
       summary: Обновить количество компонента в заявке (авторизованный пользователь)
       tags:
       - m-m
-  /coolrequests/{id}/form:
+  /cooling/{id}/form:
     put:
       description: Переводит заявку из статуса "черновик" в "сформирована" и рассчитывает
         мощность охлаждения.
@@ -672,8 +672,8 @@ paths:
       - ApiKeyAuth: []
       summary: Сформировать заявку (авторизованный пользователь)
       tags:
-      - coolrequests
-  /coolrequests/{id}/resolve:
+      - cooling
+  /cooling/{id}/resolve:
     put:
       consumes:
       - application/json
@@ -689,7 +689,7 @@ paths:
         name: action
         required: true
         schema:
-          $ref: '#/definitions/RIP_internal_app_ds.CoolRequestResolveRequest'
+          $ref: '#/definitions/RIP_internal_app_ds.CoolingResolveRequest'
       responses:
         "204":
           description: No Content
@@ -709,8 +709,8 @@ paths:
       - ApiKeyAuth: []
       summary: Завершить или отклонить заявку (только модератор)
       tags:
-      - coolrequests
-  /coolrequests/coolcart:
+      - cooling
+  /cooling/coolcart:
     get:
       description: Возвращает ID черновика текущего пользователя и количество компонентов
         в нем.
@@ -731,8 +731,8 @@ paths:
       - ApiKeyAuth: []
       summary: Получить информацию для иконки корзины (авторизованный пользователь)
       tags:
-      - coolrequests
-  /coolrequests/draft/components/{component_id}:
+      - cooling
+  /cooling/draft/components/{component_id}:
     post:
       description: Находит или создает черновик заявки для текущего пользователя и
         добавляет в него компонент.

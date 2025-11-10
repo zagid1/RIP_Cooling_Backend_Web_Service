@@ -432,7 +432,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/coolrequests": {
+        "/cooling": {
             "get": {
                 "security": [
                     {
@@ -444,7 +444,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Получить список заявок (авторизованный пользователь)",
                 "parameters": [
@@ -473,7 +473,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/RIP_internal_app_ds.CoolRequestDTO"
+                                "$ref": "#/definitions/RIP_internal_app_ds.CoolingDTO"
                             }
                         }
                     },
@@ -489,7 +489,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/coolrequests/coolcart": {
+        "/cooling/coolcart": {
             "get": {
                 "security": [
                     {
@@ -501,7 +501,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Получить информацию для иконки корзины (авторизованный пользователь)",
                 "responses": {
@@ -523,7 +523,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/coolrequests/draft/components/{component_id}": {
+        "/cooling/draft/components/{component_id}": {
             "post": {
                 "security": [
                     {
@@ -575,7 +575,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/coolrequests/{id}": {
+        "/cooling/{id}": {
             "get": {
                 "security": [
                     {
@@ -587,7 +587,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Получить одну заявку по ID (авторизованный пользователь)",
                 "parameters": [
@@ -603,7 +603,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.CoolRequestDTO"
+                            "$ref": "#/definitions/RIP_internal_app_ds.CoolingDTO"
                         }
                     },
                     "401": {
@@ -637,7 +637,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Обновить данные заявки (авторизованный пользователь)",
                 "parameters": [
@@ -654,7 +654,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.CoolRequestUpdateRequest"
+                            "$ref": "#/definitions/RIP_internal_app_ds.CoolingUpdateRequest"
                         }
                     }
                 ],
@@ -681,7 +681,7 @@ const docTemplate = `{
                 ],
                 "description": "Логически удаляет заявку, переводя ее в статус \"удалена\".",
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Удалить заявку (авторизованный пользователь)",
                 "parameters": [
@@ -709,7 +709,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/coolrequests/{id}/components/{component_id}": {
+        "/cooling/{id}/components/{component_id}": {
             "put": {
                 "security": [
                     {
@@ -745,7 +745,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.ComponentToRequestUpdateRequest"
+                            "$ref": "#/definitions/RIP_internal_app_ds.ComponentToCoolingUpdateRequest"
                         }
                     }
                 ],
@@ -807,7 +807,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/coolrequests/{id}/form": {
+        "/cooling/{id}/form": {
             "put": {
                 "security": [
                     {
@@ -816,7 +816,7 @@ const docTemplate = `{
                 ],
                 "description": "Переводит заявку из статуса \"черновик\" в \"сформирована\" и рассчитывает мощность охлаждения.",
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Сформировать заявку (авторизованный пользователь)",
                 "parameters": [
@@ -853,7 +853,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/coolrequests/{id}/resolve": {
+        "/cooling/{id}/resolve": {
             "put": {
                 "security": [
                     {
@@ -865,7 +865,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "coolrequests"
+                    "cooling"
                 ],
                 "summary": "Завершить или отклонить заявку (только модератор)",
                 "parameters": [
@@ -882,7 +882,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.CoolRequestResolveRequest"
+                            "$ref": "#/definitions/RIP_internal_app_ds.CoolingResolveRequest"
                         }
                     }
                 ],
@@ -1176,7 +1176,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.ComponentToRequestUpdateRequest": {
+        "RIP_internal_app_ds.ComponentToCoolingUpdateRequest": {
             "type": "object",
             "properties": {
                 "count": {
@@ -1204,7 +1204,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.CoolRequestDTO": {
+        "RIP_internal_app_ds.CoolingDTO": {
             "type": "object",
             "properties": {
                 "completion_date": {
@@ -1245,7 +1245,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.CoolRequestResolveRequest": {
+        "RIP_internal_app_ds.CoolingResolveRequest": {
             "type": "object",
             "required": [
                 "action"
@@ -1257,7 +1257,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.CoolRequestUpdateRequest": {
+        "RIP_internal_app_ds.CoolingUpdateRequest": {
             "type": "object",
             "properties": {
                 "room_area": {
@@ -1370,7 +1370,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "API для системы FRAX",
-	Description:      "API-сервер для управления заявками и компонентами серверов в системе CoolRequest.",
+	Description:      "API-сервер для управления заявками и компонентами серверов в системе Cooling.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

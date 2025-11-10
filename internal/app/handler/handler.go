@@ -41,15 +41,15 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 		auth.PUT("/users/:id", h.UpdateUserData)
 
 		// Заявки, доступно только авторизованным пользователям
-		auth.POST("/coolrequests/draft/components/:component_id", h.AddComponentToDraft)
-		auth.GET("/coolrequests/coolcart", h.GetCartBadge)
-		auth.GET("/coolrequests", h.ListRequests)
-		auth.GET("/coolrequests/:id", h.GetRequest)
-		auth.PUT("/coolrequests/:id", h.UpdateRequest)
-		auth.PUT("/coolrequests/:id/form", h.FormRequest)
-		auth.DELETE("/coolrequests/:id", h.DeleteRequest)
-		auth.DELETE("/coolrequests/:id/components/:component_id", h.RemoveComponentFromRequest)
-		auth.PUT("/coolrequests/:id/components/:component_id", h.UpdateComponentInRequest)
+		auth.POST("/cooling/draft/components/:component_id", h.AddComponentToDraft)
+		auth.GET("/cooling/coolcart", h.GetCartBadge)
+		auth.GET("/cooling", h.ListRequests)
+		auth.GET("/cooling/:id", h.GetRequest)
+		auth.PUT("/cooling/:id", h.UpdateRequest)
+		auth.PUT("/cooling/:id/form", h.FormRequest)
+		auth.DELETE("/cooling/:id", h.DeleteRequest)
+		auth.DELETE("/cooling/:id/components/:component_id", h.RemoveComponentFromRequest)
+		auth.PUT("/cooling/:id/components/:component_id", h.UpdateComponentInRequest)
 	}
 
 	// Эндпоинты, доступные только модераторам
@@ -63,7 +63,7 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 		moderator.POST("/components/:id/image", h.UploadComponentImage)
 
 		// Управление заявками (завершение/отклонение)
-		moderator.PUT("/coolrequests/:id/resolve", h.ResolveRequest)
+		moderator.PUT("/cooling/:id/resolve", h.ResolveRequest)
 	}
 	// Домен пользователь
 	// r.POST("/users", h.Register)
@@ -104,7 +104,7 @@ func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error)
 // func (h *Handler) RegisterHandler(router *gin.Engine) {
 // 	router.GET("/CoolSystems", h.GetComponents)
 // 	router.GET("/Component/:id", h.GetComponentByID)
-// 	router.GET("/CoolRequest/:CoolRequest_id", h.GetCoolRequest)
-// 	router.POST("/CoolRequest/add/Component/:component_id", h.AddComponentToCoolRequest)
-// 	router.POST("/CoolRequest/:CoolRequest_id/delete", h.DeleteCoolRequest)
+// 	router.GET("/Cooling/:Cooling_id", h.GetCooling)
+// 	router.POST("/Cooling/add/Component/:component_id", h.AddComponentToCooling)
+// 	router.POST("/Cooling/:Cooling_id/delete", h.DeleteCooling)
 // }

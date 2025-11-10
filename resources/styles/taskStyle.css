@@ -55,13 +55,13 @@ body {
 }
 
 /* Стили для страницы заявки */
-.coolrequest-area {
+.cooling-area {
     display: flex;
     justify-content: center;
     margin: 30px 75px;
 }
 
-.coolrequest-form {
+.cooling-form {
     background: rgba(26,27,24,1);
     border-radius: 12px;
     padding: 30px;
@@ -336,7 +336,7 @@ body {
         padding: 15px 20px;
     }
     
-    .coolrequest-area, .components-section, .action-buttons {
+    .cooling-area, .components-section, .action-buttons {
         margin: 20px;
     }
     

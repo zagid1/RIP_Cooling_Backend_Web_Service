@@ -12,7 +12,7 @@ type Users struct {
 
 	// --- СВЯЗИ ---
 	// Отношение "один-ко-многим": один пользователь может иметь много поисковых сессий.
-	CoolRequest []CoolRequest `gorm:"foreignKey:CreatorID"`
+	Cooling []Cooling `gorm:"foreignKey:CreatorID"`
 }
 
 var (

@@ -29,7 +29,7 @@
             
             <div class="cart-icon">
                 {{ if gt .cartCount 0 }}
-                    <a href="/CoolRequest/{{ .requestID }}">
+                    <a href="/Cooling/{{ .requestID }}">
                         <img src="https://cdn-icons-png.flaticon.com/512/2972/2972233.png" alt="Корзина">
                         <span class="cart-count">{{.cartCount}}</span>
                     </a>
@@ -60,7 +60,7 @@
                     <p class="tdp">TDP: {{ .TDP }} Вт</p>
                     <div class="buttons-container">
                         <!-- Кнопка для корзины -->
-                        <form action="/CoolRequest/add/Component/{{ .ID }}" method="POST">
+                        <form action="/Cooling/add/Component/{{ .ID }}" method="POST">
                             <button class="apply-btn" type="submit">добавить</button>
                         </form>
                         <!-- Кнопка для перехода к описанию -->

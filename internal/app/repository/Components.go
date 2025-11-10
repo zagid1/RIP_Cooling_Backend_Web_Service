@@ -127,40 +127,40 @@ func (r *Repository) DeleteComponent(id uint) error {
 	return nil
 }
 
-// POST /api/CoolRequest/draft/Components/:component_id - добавление компонента в черновик
+// POST /api/Cooling/draft/Components/:component_id - добавление компонента в черновик
 func (r *Repository) AddComponentToDraft(userID, componentID uint) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		var CoolRequest ds.CoolRequest
-		err := tx.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&CoolRequest).Error
+		var Cooling ds.Cooling
+		err := tx.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&Cooling).Error
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				newCoolRequest := ds.CoolRequest{
+				newCooling := ds.Cooling{
 					CreatorID:    userID,
 					Status:       ds.StatusDraft,
 					CreationDate: time.Now(),
 				}
-				if err := tx.Create(&newCoolRequest).Error; err != nil {
-					return fmt.Errorf("failed to create draft coolrequest: %w", err)
+				if err := tx.Create(&newCooling).Error; err != nil {
+					return fmt.Errorf("failed to create draft cooling: %w", err)
 				}
-				CoolRequest = newCoolRequest
+				Cooling = newCooling
 			} else {
 				return err
 			}
 		}
 
 		var count int64
-		tx.Model(&ds.ComponentToRequest{}).Where("coolrequest_id = ? AND component_id = ?", CoolRequest.ID, componentID).Count(&count)
+		tx.Model(&ds.ComponentToCooling{}).Where("cooling_id = ? AND component_id = ?", Cooling.ID, componentID).Count(&count)
 		if count > 0 {
-			return errors.New("component already in coolrequest")
+			return errors.New("component already in cooling")
 		}
 
-		link := ds.ComponentToRequest{
-			CoolRequestID: CoolRequest.ID,
-			ComponentID:   componentID,
+		link := ds.ComponentToCooling{
+			CoolingID:   Cooling.ID,
+			ComponentID: componentID,
 		}
 
 		if err := tx.Create(&link).Error; err != nil {
-			return fmt.Errorf("failed to add component to coolrequest: %w", err)
+			return fmt.Errorf("failed to add component to cooling: %w", err)
 		}
 
 		if err := tx.Model(&ds.Component{}).Where("id = ?", componentID).Update("status", true).Error; err != nil {

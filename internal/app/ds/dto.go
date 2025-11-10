@@ -33,8 +33,8 @@ type ComponentUpdateRequest struct {
 	// Status         *bool          `json:"status"`
 }
 
-// CoolRequest DTOs
-type CoolRequestDTO struct {
+// Cooling DTOs
+type CoolingDTO struct {
 	ID             uint                 `json:"id"`
 	Status         int                  `json:"status"`
 	CreationDate   time.Time            `json:"creation_date"`
@@ -58,22 +58,22 @@ type ComponentInRequest struct {
 	Count    uint    `json:"count"`
 }
 
-type CoolRequestUpdateRequest struct {
+type CoolingUpdateRequest struct {
 	RoomArea   *float64 `json:"room_area"`
 	RoomHeight *float64 `json:"room_height"`
 }
 
-type CoolRequestResolveRequest struct {
+type CoolingResolveRequest struct {
 	Action string `json:"action" binding:"required"` // "complete" | "reject"
 }
 
-type ComponentToRequestUpdateRequest struct {
+type ComponentToCoolingUpdateRequest struct {
 	Count uint `json:"count"`
 }
 
 // Cart DTO
 type CartBadgeDTO struct {
-	RequestID *uint `json:"coolrequest_id"`
+	RequestID *uint `json:"cooling_id"`
 	Count     int   `json:"count"`
 }
 
