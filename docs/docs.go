@@ -38,7 +38,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.UserLoginRequest"
+                            "$ref": "#/definitions/ds.UserLoginRequest"
                         }
                     }
                 ],
@@ -46,7 +46,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.LoginResponse"
+                            "$ref": "#/definitions/ds.LoginResponse"
                         }
                     },
                     "400": {
@@ -126,7 +126,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.PaginatedResponse"
+                            "$ref": "#/definitions/ds.PaginatedResponse"
                         }
                     },
                     "500": {
@@ -164,7 +164,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.ComponentCreateRequest"
+                            "$ref": "#/definitions/ds.ComponentCreateRequest"
                         }
                     }
                 ],
@@ -172,7 +172,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.ComponentDTO"
+                            "$ref": "#/definitions/ds.ComponentDTO"
                         }
                     },
                     "400": {
@@ -228,7 +228,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.ComponentDTO"
+                            "$ref": "#/definitions/ds.ComponentDTO"
                         }
                     },
                     "404": {
@@ -273,7 +273,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.ComponentUpdateRequest"
+                            "$ref": "#/definitions/ds.ComponentUpdateRequest"
                         }
                     }
                 ],
@@ -281,7 +281,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.ComponentDTO"
+                            "$ref": "#/definitions/ds.ComponentDTO"
                         }
                     },
                     "400": {
@@ -473,7 +473,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/RIP_internal_app_ds.CoolingDTO"
+                                "$ref": "#/definitions/ds.CoolingDTO"
                             }
                         }
                     },
@@ -508,7 +508,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.CartBadgeDTO"
+                            "$ref": "#/definitions/ds.CartBadgeDTO"
                         }
                     },
                     "401": {
@@ -603,7 +603,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.CoolingDTO"
+                            "$ref": "#/definitions/ds.CoolingDTO"
                         }
                     },
                     "401": {
@@ -654,7 +654,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.CoolingUpdateRequest"
+                            "$ref": "#/definitions/ds.CoolingUpdateRequest"
                         }
                     }
                 ],
@@ -745,7 +745,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.ComponentToCoolingUpdateRequest"
+                            "$ref": "#/definitions/ds.ComponentToCoolingUpdateRequest"
                         }
                     }
                 ],
@@ -882,7 +882,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.CoolingResolveRequest"
+                            "$ref": "#/definitions/ds.CoolingResolveRequest"
                         }
                     }
                 ],
@@ -931,7 +931,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.UserRegisterRequest"
+                            "$ref": "#/definitions/ds.UserRegisterRequest"
                         }
                     }
                 ],
@@ -939,7 +939,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.UserDTO"
+                            "$ref": "#/definitions/ds.UserDTO"
                         }
                     },
                     "400": {
@@ -991,7 +991,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.UserDTO"
+                            "$ref": "#/definitions/ds.UserDTO"
                         }
                     },
                     "401": {
@@ -1042,7 +1042,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RIP_internal_app_ds.UserUpdateRequest"
+                            "$ref": "#/definitions/ds.UserUpdateRequest"
                         }
                     }
                 ],
@@ -1082,43 +1082,21 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "RIP_internal_app_ds.CartBadgeDTO": {
+        "ds.CartBadgeDTO": {
             "type": "object",
             "properties": {
+                "cooling_id": {
+                    "type": "integer"
+                },
                 "count": {
                     "type": "integer"
-                },
-                "request_id": {
-                    "type": "integer"
                 }
             }
         },
-        "RIP_internal_app_ds.ComponentCreateRequest": {
-            "type": "object",
-            "required": [
-                "description",
-                "tdp",
-                "title"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "specifications": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "tdp": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
+        "ds.ComponentCreateRequest": {
+            "type": "object"
         },
-        "RIP_internal_app_ds.ComponentDTO": {
+        "ds.ComponentDTO": {
             "type": "object",
             "properties": {
                 "description": {
@@ -1130,16 +1108,11 @@ const docTemplate = `{
                 "image_url": {
                     "type": "string"
                 },
-                "specifications": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "status": {
                     "type": "boolean"
                 },
                 "tdp": {
+                    "description": "Specifications pq.StringArray ` + "`" + `json:\"specifications\"` + "`" + `",
                     "type": "integer"
                 },
                 "title": {
@@ -1147,7 +1120,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.ComponentInRequest": {
+        "ds.ComponentInRequest": {
             "type": "object",
             "properties": {
                 "component_id": {
@@ -1162,13 +1135,8 @@ const docTemplate = `{
                 "image_url": {
                     "type": "string"
                 },
-                "specifications": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "tdp": {
+                    "description": "Specifications pq.StringArray ` + "`" + `json:\"specifications\"` + "`" + `",
                     "type": "integer"
                 },
                 "title": {
@@ -1176,7 +1144,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.ComponentToCoolingUpdateRequest": {
+        "ds.ComponentToCoolingUpdateRequest": {
             "type": "object",
             "properties": {
                 "count": {
@@ -1184,19 +1152,14 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.ComponentUpdateRequest": {
+        "ds.ComponentUpdateRequest": {
             "type": "object",
             "properties": {
                 "description": {
                     "type": "string"
                 },
-                "specifications": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "tdp": {
+                    "description": "Specifications pq.StringArray ` + "`" + `json:\"specifications\"` + "`" + `",
                     "type": "integer"
                 },
                 "title": {
@@ -1204,7 +1167,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.CoolingDTO": {
+        "ds.CoolingDTO": {
             "type": "object",
             "properties": {
                 "completion_date": {
@@ -1213,7 +1176,7 @@ const docTemplate = `{
                 "components": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/RIP_internal_app_ds.ComponentInRequest"
+                        "$ref": "#/definitions/ds.ComponentInRequest"
                     }
                 },
                 "cooling_power": {
@@ -1245,7 +1208,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.CoolingResolveRequest": {
+        "ds.CoolingResolveRequest": {
             "type": "object",
             "required": [
                 "action"
@@ -1257,7 +1220,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.CoolingUpdateRequest": {
+        "ds.CoolingUpdateRequest": {
             "type": "object",
             "properties": {
                 "room_area": {
@@ -1268,18 +1231,18 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.LoginResponse": {
+        "ds.LoginResponse": {
             "type": "object",
             "properties": {
                 "token": {
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/RIP_internal_app_ds.UserDTO"
+                    "$ref": "#/definitions/ds.UserDTO"
                 }
             }
         },
-        "RIP_internal_app_ds.PaginatedResponse": {
+        "ds.PaginatedResponse": {
             "type": "object",
             "properties": {
                 "items": {},
@@ -1288,7 +1251,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.UserDTO": {
+        "ds.UserDTO": {
             "type": "object",
             "properties": {
                 "full_name": {
@@ -1305,7 +1268,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.UserLoginRequest": {
+        "ds.UserLoginRequest": {
             "type": "object",
             "required": [
                 "password",
@@ -1320,7 +1283,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.UserRegisterRequest": {
+        "ds.UserRegisterRequest": {
             "type": "object",
             "required": [
                 "full_name",
@@ -1339,7 +1302,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RIP_internal_app_ds.UserUpdateRequest": {
+        "ds.UserUpdateRequest": {
             "type": "object",
             "properties": {
                 "full_name": {
@@ -1369,8 +1332,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "API для системы FRAX",
-	Description:      "API-сервер для управления заявками и компонентами серверов в системе Cooling.",
+	Title:            "API для системы CoolingSystems",
+	Description:      "API-сервер для управления заявками и компонентами серверов в системе CoolingSystems.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

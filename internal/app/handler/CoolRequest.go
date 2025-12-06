@@ -31,7 +31,7 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 	draft, err := h.Repository.GetDraftRequest(userID)
 	if err != nil {
 		c.JSON(http.StatusOK, ds.CartBadgeDTO{
-			RequestID: nil,
+			CoolingID: nil,
 			Count:     0,
 		})
 		return
@@ -40,14 +40,14 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 	fullRequest, err := h.Repository.GetRequestWithComponents(draft.ID, userID, false)
 	if err != nil {
 		c.JSON(http.StatusOK, ds.CartBadgeDTO{
-			RequestID: nil,
+			CoolingID: nil,
 			Count:     0,
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, ds.CartBadgeDTO{
-		RequestID: &fullRequest.ID,
+		CoolingID: &fullRequest.ID,
 		Count:     len(fullRequest.ComponentLink),
 	})
 }

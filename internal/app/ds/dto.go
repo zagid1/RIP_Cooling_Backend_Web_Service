@@ -73,7 +73,7 @@ type ComponentToCoolingUpdateRequest struct {
 
 // Cart DTO
 type CartBadgeDTO struct {
-	RequestID *uint `json:"cooling_id"`
+	CoolingID *uint `json:"cooling_id"`
 	Count     int   `json:"count"`
 }
 

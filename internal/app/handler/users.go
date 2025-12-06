@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// POST /api/users - регистрация пользователя
+// POST /api/register - регистрация пользователя
 
 // Register godoc
 // @Summary      Регистрация нового пользователя (все)
