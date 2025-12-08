@@ -3,8 +3,6 @@ package repository
 import (
 	"RIP/internal/app/ds"
 	"errors"
-	"fmt"
-
 	//"fmt"
 	"strconv"
 	"time"
@@ -12,13 +10,22 @@ import (
 	"gorm.io/gorm"
 )
 
-// GET /api/requests/cart - иконка корзины
+// GET /api/cooling/coolcart - иконка корзины
 func (r *Repository) GetDraftRequest(userID uint) (*ds.Cooling, error) {
 	var cooling ds.Cooling
-	err := r.db.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&cooling).Error
-	if err != nil {
-		return nil, err
+	// Используем Limit(1).Find вместо First
+	// Find НЕ вызывает ошибку, если запись не найдена, а просто возвращает RowsAffected = 0
+	result := r.db.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).Limit(1).Find(&cooling)
+
+	if result.Error != nil {
+		return nil, result.Error // Это реальная ошибка БД (соединение и т.д.)
 	}
+
+	// Если записей 0, значит черновика нет -> возвращаем nil (без ошибки)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+
 	return &cooling, nil
 }
 
@@ -73,10 +80,10 @@ func (r *Repository) RequestsListFiltered(userID uint, isModerator bool, status,
 	var requestLIst []ds.Cooling
 
 	// СРОЧНАЯ ОТЛАДКА
-	fmt.Printf("=== DEBUG ===\n")
-	fmt.Printf("Input - userID: %d, isModerator: %t, status: '%s', from: '%s', to: '%s'\n",
-		userID, isModerator, status, from, to)
-	fmt.Printf("Constants - StatusDeleted: %d, StatusDraft: %d\n", ds.StatusDeleted, ds.StatusDraft)
+	// fmt.Printf("=== DEBUG ===\n")
+	// fmt.Printf("Input - userID: %d, isModerator: %t, status: '%s', from: '%s', to: '%s'\n",
+	// 	userID, isModerator, status, from, to)
+	// fmt.Printf("Constants - StatusDeleted: %d, StatusDraft: %d\n", ds.StatusDeleted, ds.StatusDraft)
 
 	query := r.db.Preload("Creator").Preload("Moderator")
 

@@ -80,31 +80,3 @@ func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error)
 		"description": err.Error(),
 	})
 }
-
-// package handler
-
-// import (
-// 	"RIP/internal/app/repository"
-
-// 	"github.com/gin-gonic/gin"
-// 	"github.com/sirupsen/logrus"
-// )
-
-// type Handler struct {
-// 	Repository *repository.Repository
-// }
-
-// func NewHandler(r *repository.Repository) *Handler {
-// 	return &Handler{
-// 		Repository: r,
-// 	}
-// }
-
-// // RegisterHandler Функция, в которой мы отдельно регистрируем маршруты, чтобы не писать все в одном месте
-// func (h *Handler) RegisterHandler(router *gin.Engine) {
-// 	router.GET("/CoolSystems", h.GetComponents)
-// 	router.GET("/Component/:id", h.GetComponentByID)
-// 	router.GET("/Cooling/:Cooling_id", h.GetCooling)
-// 	router.POST("/Cooling/add/Component/:component_id", h.AddComponentToCooling)
-// 	router.POST("/Cooling/:Cooling_id/delete", h.DeleteCooling)
-// }

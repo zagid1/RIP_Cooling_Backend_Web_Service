@@ -129,45 +129,50 @@ func (r *Repository) DeleteComponent(id uint) error {
 
 // POST /api/Cooling/draft/Components/:component_id - добавление компонента в черновик
 func (r *Repository) AddComponentToDraft(userID, componentID uint) error {
-	return r.db.Transaction(func(tx *gorm.DB) error {
-		var Cooling ds.Cooling
-		err := tx.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&Cooling).Error
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				newCooling := ds.Cooling{
-					CreatorID:    userID,
-					Status:       ds.StatusDraft,
-					CreationDate: time.Now(),
-				}
-				if err := tx.Create(&newCooling).Error; err != nil {
-					return fmt.Errorf("failed to create draft cooling: %w", err)
-				}
-				Cooling = newCooling
-			} else {
-				return err
+	// Убираем общую транзакцию, чтобы корзина не удалялась при ошибке
+	// 1. Ищем или создаем Корзину
+	var cooling ds.Cooling
+	err := r.db.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&cooling).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			cooling = ds.Cooling{
+				CreatorID:    userID,
+				Status:       ds.StatusDraft,
+				CreationDate: time.Now(),
 			}
+			if err := r.db.Create(&cooling).Error; err != nil {
+				return fmt.Errorf("ошибка создания корзины: %w", err)
+			}
+		} else {
+			return err
 		}
+	}
 
-		var count int64
-		tx.Model(&ds.ComponentToCooling{}).Where("cooling_id = ? AND component_id = ?", Cooling.ID, componentID).Count(&count)
-		if count > 0 {
-			return errors.New("component already in cooling")
-		}
+	// 2. ПРОВЕРЯЕМ РУКАМИ (вместо ON CONFLICT)
+	var count int64
+	r.db.Model(&ds.ComponentToCooling{}).
+		Where("cooling_id = ? AND component_id = ?", cooling.ID, componentID).
+		Count(&count)
 
-		link := ds.ComponentToCooling{
-			CoolingID:   Cooling.ID,
-			ComponentID: componentID,
-		}
+	if count > 0 {
+		// Если уже есть - просто выходим (или возвращаем ошибку)
+		// return fmt.Errorf("компонент уже добавлен")
+		return nil // Возвращаем nil, типа "все ок, добавлено"
+	}
 
-		if err := tx.Create(&link).Error; err != nil {
-			return fmt.Errorf("failed to add component to cooling: %w", err)
-		}
+	// 3. Добавляем, так как точно знаем, что его нет
+	link := ds.ComponentToCooling{
+		CoolingID:   cooling.ID,
+		ComponentID: componentID,
+		Count:       1,
+	}
 
-		if err := tx.Model(&ds.Component{}).Where("id = ?", componentID).Update("status", true).Error; err != nil {
-			return fmt.Errorf("failed to update component status: %w", err)
-		}
-		return nil
-	})
+	if err := r.db.Create(&link).Error; err != nil {
+		return fmt.Errorf("ошибка записи в БД: %w", err)
+	}
+
+	return nil
 }
 
 // POST /api/components/:id/image - загрузка изображения компонента

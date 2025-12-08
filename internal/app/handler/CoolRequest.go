@@ -30,6 +30,13 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 
 	draft, err := h.Repository.GetDraftRequest(userID)
 	if err != nil {
+		// Если пришла именно ошибка БД (например, база упала)
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	// Если черновика просто нет (вернулся nil без ошибки)
+	if draft == nil {
 		c.JSON(http.StatusOK, ds.CartBadgeDTO{
 			CoolingID: nil,
 			Count:     0,
@@ -39,6 +46,7 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 
 	fullRequest, err := h.Repository.GetRequestWithComponents(draft.ID, userID, false)
 	if err != nil {
+		// Тут тоже можно вернуть пустую корзину или ошибку, по ситуации
 		c.JSON(http.StatusOK, ds.CartBadgeDTO{
 			CoolingID: nil,
 			Count:     0,
@@ -51,6 +59,7 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 		Count:     len(fullRequest.ComponentLink),
 	})
 }
+
 
 // GET /api/cooling - список заявок с фильтрацией
 
