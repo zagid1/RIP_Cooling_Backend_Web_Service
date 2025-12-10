@@ -112,3 +112,22 @@ type PaginatedResponse struct {
 	Items interface{} `json:"items"`
 	Total int64       `json:"total"`
 }
+
+type AsyncCoolingRequest struct {
+	ID         uint    `json:"id"`
+	RoomArea   float64 `json:"room_area"`
+	RoomHeight float64 `json:"room_height"`
+	TotalTDP   int     `json:"total_tdp"` // <-- Новое поле вместо Components
+}
+
+type ComponentData struct {
+	ID    uint `json:"id"`
+	TDP   int  `json:"tdp"`
+	Count int  `json:"count"`
+}
+
+// То, что Python присылает нам обратно (Webhook)
+type AsyncCoolingResponse struct {
+	ID           uint    `json:"id"`
+	CoolingPower float64 `json:"cooling_power"`
+}

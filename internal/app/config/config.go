@@ -21,10 +21,12 @@ type RedisConfig struct {
 }
 
 type Config struct {
-	ServiceHost string
-	ServicePort int
-	JWT         JWTConfig
-	Redis       RedisConfig
+	ServiceHost       string
+	ServicePort       int
+	JWT               JWTConfig
+	Redis             RedisConfig
+	AsyncServiceUrl   string
+	InternalAuthToken string
 }
 
 func NewConfig() (*Config, error) {
@@ -50,6 +52,9 @@ func NewConfig() (*Config, error) {
 	redisPassword := os.Getenv("REDIS_PASSWORD")
 	redisUser := os.Getenv("REDIS_USER")
 
+	asyncUrl := os.Getenv("ASYNC_SERVICE_URL")
+	internalToken := os.Getenv("INTERNAL_AUTH_TOKEN")
+
 	return &Config{
 		ServiceHost: host,
 		ServicePort: port,
@@ -63,6 +68,8 @@ func NewConfig() (*Config, error) {
 			Password: redisPassword,
 			User:     redisUser,
 		},
+		AsyncServiceUrl:   asyncUrl,
+		InternalAuthToken: internalToken,
 	}, nil
 }
 

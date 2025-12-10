@@ -2,11 +2,18 @@ package handler
 
 import (
 	"RIP/internal/app/ds"
+	"bytes"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -59,7 +66,6 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 		Count:     len(fullRequest.ComponentLink),
 	})
 }
-
 
 // GET /api/cooling - список заявок с фильтрацией
 
@@ -214,6 +220,34 @@ func (h *Handler) UpdateRequest(c *gin.Context) {
 	})
 }
 
+// PUT /api/internal/cooling/updating
+// Этот метод вызывает Python-сервис, когда расчет готов
+func (h *Handler) SetCoolingResult(c *gin.Context) {
+	// 1. Псевдо-авторизация (проверка токена от скрипта)
+	token := c.GetHeader("Authorization")
+	expectedToken := "secret12" // Должен совпадать с AUTH_TOKEN в Python
+
+	if token != expectedToken {
+		c.JSON(http.StatusForbidden, gin.H{"error": "invalid token"})
+		return
+	}
+
+	// 2. Парсинг ответа от Python
+	var res ds.AsyncCoolingResponse
+	if err := c.BindJSON(&res); err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// 3. Сохранение результата в БД (вызываем метод репозитория, который мы писали ранее)
+	if err := h.Repository.UpdateCoolingResult(res.ID, res.CoolingPower); err != nil {
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "updated"})
+}
+
 // PUT /api/cooling/:id/form - сформировать заявку
 
 // FormRequest godoc
@@ -226,6 +260,8 @@ func (h *Handler) UpdateRequest(c *gin.Context) {
 // @Failure      400 {object} map[string]string "Не все поля заполнены"
 // @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Router       /cooling/{id}/form [put]
+// PUT /api/cooling/:id/form - сформировать заявку
+
 func (h *Handler) FormRequest(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -239,6 +275,8 @@ func (h *Handler) FormRequest(c *gin.Context) {
 		return
 	}
 
+	// Просто переводим статус в "Сформирована" (Formed).
+	// Расчет здесь больше НЕ производится.
 	if err := h.Repository.FormRequest(uint(id), userID); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
@@ -247,6 +285,43 @@ func (h *Handler) FormRequest(c *gin.Context) {
 	c.JSON(http.StatusNoContent, gin.H{
 		"message": "Заявка сформирована",
 	})
+}
+
+// Вспомогательная функция для отправки POST запроса с авторизацией
+func sendAsyncCoolingCalc(url string, data ds.AsyncCoolingRequest) {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		logrus.Errorf("JSON marshal failed: %v", err)
+		return
+	}
+
+	// Создаем запрос вручную для добавления заголовков
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		logrus.Errorf("Request creation failed: %v", err)
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", os.Getenv("PYTHON_SERVICE_TOKEN"))
+
+	// Отправляем запрос
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		logrus.Errorf("Failed to send async calc request: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		logrus.Errorf(
+			"Async service returned status %d: %s",
+			resp.StatusCode,
+			string(body),
+		)
+	}
 }
 
 // PUT /api/cooling/:id/resolve - завершить/отклонить заявку
@@ -263,6 +338,7 @@ func (h *Handler) FormRequest(c *gin.Context) {
 // @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Failure      403 {object} map[string]string "Доступ запрещен"
 // @Router       /cooling/{id}/resolve [put]
+
 func (h *Handler) ResolveRequest(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -281,14 +357,67 @@ func (h *Handler) ResolveRequest(c *gin.Context) {
 		h.errorHandler(c, http.StatusUnauthorized, err)
 		return
 	}
-
 	moderatorID := uint(userID)
+
+	// 1. Сначала меняем статус в БД (раз статусы компонентов не важны, порядок не так критичен,
+	// но лучше зафиксировать решение).
 	if err := h.Repository.ResolveRequest(uint(id), moderatorID, req.Action); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{
+	// 2. Если заявка принята, собираем данные и логируем процесс подсчета
+	if req.Action == "complete" {
+		// Получаем полные данные заявки (isModerator=true, чтобы игнорировать проверки владельца)
+		coolingFull, err := h.Repository.GetRequestWithComponents(uint(id), moderatorID, true)
+
+		if err == nil && coolingFull != nil {
+
+			// Проверка площади и высоты
+			area := 0.0
+			if coolingFull.RoomArea != nil {
+				area = *coolingFull.RoomArea
+			}
+
+			height := 0.0
+			if coolingFull.RoomHeight != nil {
+				height = *coolingFull.RoomHeight
+			}
+
+			totalTDP := 0
+			for i, link := range coolingFull.ComponentLink {
+				// Выводим сырые данные, чтобы понять, что пришло из БД
+				compTitle := link.Component.Title
+				compTDP := link.Component.TDP
+				count := int(link.Count)
+				subTotal := compTDP * count
+
+				fmt.Printf("  [%d] CompID: %d | Название: '%s' | TDP (1 шт): %d | Кол-во: %d | Итог: %d\n",
+					i, link.ComponentID, compTitle, compTDP, count, subTotal)
+
+				totalTDP += subTotal
+			}
+
+			// Формируем DTO для отправки в Python
+			reqData := ds.AsyncCoolingRequest{
+				ID:         coolingFull.ID,
+				RoomArea:   area,
+				RoomHeight: height,
+				TotalTDP:   totalTDP,
+			}
+
+			// Отправляем в Python
+			go sendAsyncCoolingCalc("http://localhost:8000/api/calculate_cool_power/", reqData)
+
+		} else {
+			logrus.Errorf("Failed to fetch cooling data for async calc: %v", err)
+			if err != nil {
+				fmt.Printf("DEBUG ERROR: %v\n", err)
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
 		"message": "Заявка обработана модератором",
 	})
 }

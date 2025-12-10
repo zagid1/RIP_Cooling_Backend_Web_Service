@@ -65,6 +65,11 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 		// Управление заявками (завершение/отклонение)
 		moderator.PUT("/cooling/:id/resolve", h.ResolveRequest)
 	}
+
+	internal := r.Group("/internal")
+	{
+		internal.PUT("/cooling/updating", h.SetCoolingResult)
+	}
 	// Домен пользователь
 	// r.POST("/users", h.Register)
 	// r.GET("/users/:id", h.GetUserData)
