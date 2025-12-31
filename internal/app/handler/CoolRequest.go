@@ -17,6 +17,25 @@ import (
 	"gorm.io/gorm"
 )
 
+// POST /api/admin/seed
+func (h *Handler) SeedData(c *gin.Context) {
+	// Засекаем время
+	start := time.Now()
+
+	// Запускаем генерацию
+	if err := h.Repository.SeedCoolingData(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	duration := time.Since(start)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":    "Успешно создано 100,000 записей",
+		"time_taken": duration.String(),
+	})
+}
+
 // GET /api/cooling/coolcart - иконка корзины
 
 // GetCartBadge godoc
@@ -31,7 +50,10 @@ import (
 func (h *Handler) GetCartBadge(c *gin.Context) {
 	userID, err := getUserIDFromContext(c)
 	if err != nil {
-		h.errorHandler(c, http.StatusUnauthorized, err)
+		c.JSON(http.StatusOK, ds.CartBadgeDTO{
+			CoolingID: nil,
+			Count:     -1,
+		})
 		return
 	}
 
@@ -46,7 +68,7 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 	if draft == nil {
 		c.JSON(http.StatusOK, ds.CartBadgeDTO{
 			CoolingID: nil,
-			Count:     0,
+			Count:     -1,
 		})
 		return
 	}
@@ -75,30 +97,66 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 // @Tags         cooling
 // @Produce      json
 // @Security     ApiKeyAuth
-// @Param        status query int false "Фильтр по статусу заявки"
-// @Param        from query string false "Фильтр по дате 'от' (формат YYYY-MM-DD)"
-// @Param        to query string false "Фильтр по дате 'до' (формат YYYY-MM-DD)"
-// @Success      200 {array} ds.CoolingDTO
+// @Param        status     query    string  false  "Статус"
+// @Param        from       query    string  false  "Дата от"
+// @Param        to         query    string  false  "Дата до"
+// @Param        page       query    int     false  "Страница"
+// @Param        page_size  query    int     false  "Размер"
+// @Param        use_index  query    bool    false  "Индекс БД"
+// @Success      200 {object} ds.PaginatedCoolingResponse
 // @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Router       /cooling [get]
-func (h *Handler) ListRequests(c *gin.Context) {
+// GET /api/requests
+func (h *Handler) GetRequestsList(c *gin.Context) {
 	userID, err := getUserIDFromContext(c)
 	if err != nil {
 		h.errorHandler(c, http.StatusUnauthorized, err)
 		return
 	}
+
 	isModerator := isUserModerator(c)
+
 	status := c.Query("status")
 	from := c.Query("from")
 	to := c.Query("to")
 
-	requests, err := h.Repository.RequestsListFiltered(userID, isModerator, status, from, to)
+	// --- НОВОЕ: Читаем фильтр по создателю ---
+	creatorIDStr := c.Query("creator_id")
+	var filterCreatorID uint = 0
+	if creatorIDStr != "" && creatorIDStr != "all" {
+		if id, err := strconv.Atoi(creatorIDStr); err == nil {
+			filterCreatorID = uint(id)
+		}
+	}
+
+	// Пагинация
+	pageStr := c.Query("page")
+	page, _ := strconv.Atoi(pageStr)
+	if page <= 0 {
+		page = 1
+	}
+
+	limitStr := c.Query("page_size")
+	limit, _ := strconv.Atoi(limitStr)
+	if limit <= 0 {
+		limit = 10
+	}
+	
+	// Индекс
+	useIndexStr := c.Query("use_index")
+	useIndex := true
+	if useIndexStr == "false" || useIndexStr == "0" {
+		useIndex = false
+	}
+
+	// Вызов репозитория с новым параметром filterCreatorID
+	response, err := h.Repository.GetCoolingListFiltered(uint(userID), isModerator, filterCreatorID, status, from, to, page, limit, useIndex)
 	if err != nil {
 		h.errorHandler(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, requests)
+	c.JSON(http.StatusOK, response)
 }
 
 // GET /api/cooling/:id - одна заявка с компонентами
@@ -261,7 +319,6 @@ func (h *Handler) SetCoolingResult(c *gin.Context) {
 // @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Router       /cooling/{id}/form [put]
 // PUT /api/cooling/:id/form - сформировать заявку
-
 func (h *Handler) FormRequest(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -338,7 +395,6 @@ func sendAsyncCoolingCalc(url string, data ds.AsyncCoolingRequest) {
 // @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Failure      403 {object} map[string]string "Доступ запрещен"
 // @Router       /cooling/{id}/resolve [put]
-
 func (h *Handler) ResolveRequest(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

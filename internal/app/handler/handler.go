@@ -25,6 +25,7 @@ func NewHandler(r *repository.Repository, redis *redis.Client, jwtConfig *config
 
 func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 
+	r.POST("/admin/seed", h.SeedData)
 	// Доступны всем
 	r.POST("/users", h.Register)
 	r.POST("/auth/login", h.Login)
@@ -43,7 +44,7 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 		// Заявки, доступно только авторизованным пользователям
 		auth.POST("/cooling/draft/components/:component_id", h.AddComponentToDraft)
 		auth.GET("/cooling/coolcart", h.GetCartBadge)
-		auth.GET("/cooling", h.ListRequests)
+		auth.GET("/cooling", h.GetRequestsList)
 		auth.GET("/cooling/:id", h.GetRequest)
 		auth.PUT("/cooling/:id", h.UpdateRequest)
 		auth.PUT("/cooling/:id/form", h.FormRequest)

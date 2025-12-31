@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"fmt"
-	"log"
 	"mime/multipart"
 	"net/url"
 	"path/filepath"
@@ -23,14 +22,23 @@ func (r *Repository) ComponentsList(title string) ([]ds.Component, int64, error)
 	var components []ds.Component
 	var total int64
 
+	// Начинаем запрос
 	query := r.db.Model(&ds.Component{})
+
+	// --- МЯГКОЕ УДАЛЕНИЕ: Фильтр ---
+	// Считаем и ищем только активные компоненты
+	query = query.Where("status = ?", true)
+
 	if title != "" {
 		query = query.Where("title ILIKE ?", "%"+title+"%")
 	}
+
+	// Считаем количество (с учетом фильтра по статусу и названию)
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
+	// Получаем данные
 	componentsQuery := query.Order("id asc")
 	if err := componentsQuery.Find(&components).Error; err != nil {
 		return nil, 0, err
@@ -42,6 +50,9 @@ func (r *Repository) ComponentsList(title string) ([]ds.Component, int64, error)
 // GET /api/components/:id - один компонент
 func (r *Repository) GetComponentByID(id int) (*ds.Component, error) {
 	var component ds.Component
+	// Здесь мы просто получаем компонент как есть.
+	// Хендлер сам проверит поле Status и вернет 404, если Status == false.
+	// Это полезно, если в будущем админ захочет посмотреть удаленный товар по прямой ссылке.
 	err := r.db.First(&component, id).Error
 	if err != nil {
 		return nil, err
@@ -51,6 +62,8 @@ func (r *Repository) GetComponentByID(id int) (*ds.Component, error) {
 
 // POST /api/components - создание компонента
 func (r *Repository) CreateComponent(component *ds.Component) error {
+	// При создании компонент активен (это задается в хендлере или здесь)
+	// component.Status = true // Можно раскомментировать для надежности
 	return r.db.Create(component).Error
 }
 
@@ -76,6 +89,8 @@ func (r *Repository) UpdateComponent(id uint, req ds.ComponentUpdateRequest) (*d
 	// if req.ImageURL != nil {
 	// 	component.ImageURL = req.ImageURL
 	// }
+	
+	// Если нужно обновлять статус через PUT (например, для восстановления), раскомментируйте:
 	// if req.Status != nil {
 	// 	component.Status = *req.Status
 	// }
@@ -87,41 +102,21 @@ func (r *Repository) UpdateComponent(id uint, req ds.ComponentUpdateRequest) (*d
 	return &component, nil
 }
 
-// DELETE /api/components/:id - удаление компонента
+// DELETE /api/components/:id - МЯГКОЕ удаление компонента
 func (r *Repository) DeleteComponent(id uint) error {
-	var component ds.Component
-	var imageURLToDelete string
-
-	err := r.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.First(&component, id).Error; err != nil {
-			return err
-		}
-		if component.ImageURL != nil {
-			imageURLToDelete = *component.ImageURL
-		}
-		if err := tx.Delete(&ds.Component{}, id).Error; err != nil {
-			return err
-		}
-		return nil
-	})
-
-	if err != nil {
-		return err
+	// --- МЯГКОЕ УДАЛЕНИЕ ---
+	// Мы НЕ удаляем запись из БД и НЕ удаляем картинку из MinIO.
+	// Мы просто меняем флаг status на false.
+	
+	result := r.db.Model(&ds.Component{}).Where("id = ?", id).Update("status", false)
+	
+	if result.Error != nil {
+		return result.Error
 	}
-
-	if imageURLToDelete != "" {
-		parsedURL, err := url.Parse(imageURLToDelete)
-		if err != nil {
-			log.Printf("ERROR: could not parse image URL for deletion: %v", err)
-			return nil
-		}
-
-		objectName := strings.TrimPrefix(parsedURL.Path, fmt.Sprintf("/%s/", r.bucketName))
-
-		err = r.minioClient.RemoveObject(context.Background(), r.bucketName, objectName, minio.RemoveObjectOptions{})
-		if err != nil {
-			log.Printf("ERROR: failed to delete object '%s' from MinIO: %v", objectName, err)
-		}
+	
+	// (Опционально) Проверка, что запись действительно была
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("компонент с id %d не найден", id)
 	}
 
 	return nil
@@ -129,7 +124,6 @@ func (r *Repository) DeleteComponent(id uint) error {
 
 // POST /api/Cooling/draft/Components/:component_id - добавление компонента в черновик
 func (r *Repository) AddComponentToDraft(userID, componentID uint) error {
-	// Убираем общую транзакцию, чтобы корзина не удалялась при ошибке
 	// 1. Ищем или создаем Корзину
 	var cooling ds.Cooling
 	err := r.db.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&cooling).Error
@@ -149,19 +143,17 @@ func (r *Repository) AddComponentToDraft(userID, componentID uint) error {
 		}
 	}
 
-	// 2. ПРОВЕРЯЕМ РУКАМИ (вместо ON CONFLICT)
+	// 2. Проверка на дубликаты
 	var count int64
 	r.db.Model(&ds.ComponentToCooling{}).
 		Where("cooling_id = ? AND component_id = ?", cooling.ID, componentID).
 		Count(&count)
 
 	if count > 0 {
-		// Если уже есть - просто выходим (или возвращаем ошибку)
-		// return fmt.Errorf("компонент уже добавлен")
-		return nil // Возвращаем nil, типа "все ок, добавлено"
+		return nil 
 	}
 
-	// 3. Добавляем, так как точно знаем, что его нет
+	// 3. Добавляем
 	link := ds.ComponentToCooling{
 		CoolingID:   cooling.ID,
 		ComponentID: componentID,
@@ -186,11 +178,13 @@ func (r *Repository) UploadComponentImage(componentID uint, fileHeader *multipar
 
 		const imagePathPrefix = "Components/"
 
+		// Удаляем старую картинку, только если загружаем новую
 		if component.ImageURL != nil && *component.ImageURL != "" {
 			oldImageURL, err := url.Parse(*component.ImageURL)
 			if err == nil {
 				oldObjectName := strings.TrimPrefix(oldImageURL.Path, fmt.Sprintf("/%s/", r.bucketName))
-				r.minioClient.RemoveObject(context.Background(), r.bucketName, oldObjectName, minio.RemoveObjectOptions{})
+				// Ошибки удаления старой картинки игнорируем, чтобы не ломать флоу
+				_ = r.minioClient.RemoveObject(context.Background(), r.bucketName, oldObjectName, minio.RemoveObjectOptions{})
 			}
 		}
 
@@ -225,43 +219,3 @@ func (r *Repository) UploadComponentImage(componentID uint, fileHeader *multipar
 	}
 	return finalImageURL, nil
 }
-
-// package repository
-
-// import (
-// 	"fmt"
-
-// 	"RIP/internal/app/ds"
-// )
-
-// func (r *Repository) GetComponents() ([]ds.Component, error) {
-// 	var components []ds.Component
-// 	err := r.db.Find(&components).Error
-// 	// обязательно проверяем ошибки, и если они появились - передаем выше, то есть хендлеру
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if len(components) == 0 {
-// 		return nil, fmt.Errorf("массив пустой")
-// 	}
-
-// 	return components, nil
-// }
-
-// func (r *Repository) GetComponentByID(id int) (*ds.Component, error) {
-// 	component := ds.Component{}
-// 	err := r.db.Where("id = ?", id).First(&component).Error
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &component, nil
-// }
-
-// func (r *Repository) GetComponentsByTitle(title string) ([]ds.Component, error) {
-// 	var components []ds.Component
-// 	err := r.db.Where("title ILIKE ?", "%"+title+"%").Find(&components).Error
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return components, nil
-// }

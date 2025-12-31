@@ -4,10 +4,14 @@ import "time"
 
 // Requests соответствует таблице "requests" - заявки на расчет системы охлаждения
 type Cooling struct {
-	ID             uint       `gorm:"primaryKey;column:id"`
-	Status         int        `gorm:"column:status;not null"` // 1-черновик, 2-удален, 3-сформирован, 4-завершен, 5-отклонен
-	CreationDate   time.Time  `gorm:"column:creation_date;not null"`
-	CreatorID      uint       `gorm:"column:creator_id;not null"`
+	ID uint `gorm:"primaryKey;column:id"`
+	// Cоставной индекс (idx_main), приоритет 2
+	Status int `gorm:"column:status;not null;index:idx_main,priority:2"`
+	// Cоставной индекс (idx_main), приоритет 3 (для сортировки)
+	// Sort:desc, если сортировка чаще от новых к старым
+	CreationDate time.Time `gorm:"column:creation_date;not null;index:idx_main,priority:3,sort:desc"`
+	// Cоставной индекс (idx_main), приоритет 1 (самое сильное условие)
+	CreatorID      uint       `gorm:"column:creator_id;not null;index:idx_main,priority:1"`
 	FormingDate    *time.Time `gorm:"column:forming_date"`
 	CompletionDate *time.Time `gorm:"column:completion_date"`
 	ModeratorID    *uint      `gorm:"column:moderator_id"`

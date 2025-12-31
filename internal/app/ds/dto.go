@@ -131,3 +131,20 @@ type AsyncCoolingResponse struct {
 	ID           uint    `json:"id"`
 	CoolingPower float64 `json:"cooling_power"`
 }
+
+type PostgresExplainResponse []struct {
+	ExecutionTime float64 `json:"Execution Time"`
+}
+
+// Обновленная структура ответа с пагинацией и временем
+type PaginatedCoolingResponse struct {
+	Items         []CoolingDTO `json:"items"`
+	Total         int64        `json:"total"`
+	QueryDuration float64      `json:"query_duration_ms"` // Время выполнения в мс
+	UserStats     []UserStatDTO   `json:"user_stats,omitempty"` 
+}
+
+type UserStatDTO struct {
+	UserID uint  `json:"user_id"` // Исправил int на uint, так как ID обычно uint
+	Count  int64 `json:"count"`
+}

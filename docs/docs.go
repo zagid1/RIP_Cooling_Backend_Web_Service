@@ -449,21 +449,39 @@ const docTemplate = `{
                 "summary": "Получить список заявок (авторизованный пользователь)",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Фильтр по статусу заявки",
+                        "type": "string",
+                        "description": "Статус",
                         "name": "status",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Фильтр по дате 'от' (формат YYYY-MM-DD)",
+                        "description": "Дата от",
                         "name": "from",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Фильтр по дате 'до' (формат YYYY-MM-DD)",
+                        "description": "Дата до",
                         "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Страница",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Размер",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Индекс БД",
+                        "name": "use_index",
                         "in": "query"
                     }
                 ],
@@ -471,10 +489,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ds.CoolingDTO"
-                            }
+                            "$ref": "#/definitions/ds.PaginatedCoolingResponse"
                         }
                     },
                     "401": {
@@ -1242,6 +1257,30 @@ const docTemplate = `{
                 }
             }
         },
+        "ds.PaginatedCoolingResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ds.CoolingDTO"
+                    }
+                },
+                "query_duration_ms": {
+                    "description": "Время выполнения в мс",
+                    "type": "number"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "user_stats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ds.UserStatDTO"
+                    }
+                }
+            }
+        },
         "ds.PaginatedResponse": {
             "type": "object",
             "properties": {
@@ -1299,6 +1338,18 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "ds.UserStatDTO": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "description": "Исправил int на uint, так как ID обычно uint",
+                    "type": "integer"
                 }
             }
         },

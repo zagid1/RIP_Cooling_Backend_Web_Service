@@ -105,6 +105,22 @@ definitions:
       user:
         $ref: '#/definitions/ds.UserDTO'
     type: object
+  ds.PaginatedCoolingResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/ds.CoolingDTO'
+        type: array
+      query_duration_ms:
+        description: Время выполнения в мс
+        type: number
+      total:
+        type: integer
+      user_stats:
+        items:
+          $ref: '#/definitions/ds.UserStatDTO'
+        type: array
+    type: object
   ds.PaginatedResponse:
     properties:
       items: {}
@@ -144,6 +160,14 @@ definitions:
     - full_name
     - password
     - username
+    type: object
+  ds.UserStatDTO:
+    properties:
+      count:
+        type: integer
+      user_id:
+        description: Исправил int на uint, так как ID обычно uint
+        type: integer
     type: object
   ds.UserUpdateRequest:
     properties:
@@ -438,27 +462,37 @@ paths:
       description: Возвращает отфильтрованный список всех сформированных заявок (кроме
         черновиков и удаленных).
       parameters:
-      - description: Фильтр по статусу заявки
+      - description: Статус
         in: query
         name: status
-        type: integer
-      - description: Фильтр по дате 'от' (формат YYYY-MM-DD)
+        type: string
+      - description: Дата от
         in: query
         name: from
         type: string
-      - description: Фильтр по дате 'до' (формат YYYY-MM-DD)
+      - description: Дата до
         in: query
         name: to
         type: string
+      - description: Страница
+        in: query
+        name: page
+        type: integer
+      - description: Размер
+        in: query
+        name: page_size
+        type: integer
+      - description: Индекс БД
+        in: query
+        name: use_index
+        type: boolean
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/ds.CoolingDTO'
-            type: array
+            $ref: '#/definitions/ds.PaginatedCoolingResponse'
         "401":
           description: Необходима авторизация
           schema:
